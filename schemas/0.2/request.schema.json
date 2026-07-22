@@ -1,0 +1,23 @@
+{
+  "$defs": {"Header":{"additionalProperties":false,"properties":{"name":{"title":"Name","type":"string"},"value":{"title":"Value","type":"string"}},"required":["name","value"],"title":"Header","type":"object"}},
+  "$id": "https://reprosec.dev/schemas/rcap/0.2/request.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "body":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Body"},
+    "body_base64":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Body Base64"},
+    "body_sha256":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Body Sha256"},
+    "body_size_bytes":{"anyOf":[{"minimum":0,"type":"integer"},{"type":"null"}],"default":null,"title":"Body Size Bytes"},
+    "headers":{"items":{"$ref":"#/$defs/Header"},"title":"Headers","type":"array"},
+    "import_metadata":{"additionalProperties":true,"title":"Import Metadata","type":"object"},
+    "media_type":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Media Type"},
+    "method":{"title":"Method","type":"string"},
+    "observed_at":{"title":"Observed At","type":"string"},
+    "redacted":{"default":false,"title":"Redacted","type":"boolean"},
+    "request_id":{"title":"Request Id","type":"string"},
+    "source":{"default":"user_input","title":"Source","type":"string"},
+    "url":{"title":"Url","type":"string"}
+  },
+  "required":["method","url"],
+  "title":"RequestRecord",
+  "type":"object"
+}

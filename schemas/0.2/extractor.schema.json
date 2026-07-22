@@ -1,0 +1,15 @@
+{
+  "$id": "https://reprosec.dev/schemas/rcap/0.2/extractor.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "extractor_id": {"title":"Extractor Id","type":"string"},
+    "kind": {"enum":["header","cookie","regex","jsonpath"],"title":"Kind","type":"string"},
+    "name": {"title":"Name","type":"string"},
+    "response_id": {"title":"Response Id","type":"string"},
+    "selector": {"title":"Selector","type":"string"},
+    "sensitive": {"default":false,"title":"Sensitive","type":"boolean"}
+  },
+  "required": ["response_id","name","kind","selector"],
+  "title": "ExtractorSpec",
+  "type": "object"
+}

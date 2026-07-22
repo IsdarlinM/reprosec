@@ -1,0 +1,18 @@
+{
+  "$id": "https://reprosec.dev/schemas/rcap/0.2/capsule.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "capsule_id": {"title":"Capsule Id","type":"string"},
+    "created_at": {"title":"Created At","type":"string"},
+    "created_by": {"default":"reprosec","title":"Created By","type":"string"},
+    "deterministic_replay": {"default":false,"title":"Deterministic Replay","type":"boolean"},
+    "format": {"const":"RCAP","default":"RCAP","title":"Format","type":"string"},
+    "notes": {"default":"","title":"Notes","type":"string"},
+    "schema_version": {"default":"0.2","title":"Schema Version","type":"string"},
+    "title": {"title":"Title","type":"string"},
+    "tool_version": {"default":"0.3.0","title":"Tool Version","type":"string"}
+  },
+  "required": ["title"],
+  "title": "CapsuleMetadata",
+  "type": "object"
+}
