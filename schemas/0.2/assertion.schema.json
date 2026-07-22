@@ -1,0 +1,52 @@
+{
+  "$id": "https://reprosec.dev/schemas/rcap/0.2/assertion.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "assertion_id": {
+      "title": "Assertion Id",
+      "type": "string"
+    },
+    "expected": {
+      "title": "Expected",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "status_code",
+        "status_in",
+        "header_exists",
+        "header_equals",
+        "body_contains",
+        "body_not_contains",
+        "body_regex",
+        "jsonpath_exists",
+        "jsonpath_equals"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "selector": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selector"
+    }
+  },
+  "required": [
+    "request_id",
+    "kind",
+    "expected"
+  ],
+  "title": "AssertionSpec",
+  "type": "object"
+}
