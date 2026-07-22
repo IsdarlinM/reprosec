@@ -1,37 +1,26 @@
 from __future__ import annotations
 
 import json
-import tempfile
 from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
 
 import typer
 
-from sric.policy import PolicyEngine
 from sric.audit import AuditLogger
 from sric.models import OperationMode
+from sric.policy import PolicyEngine
 from sric.scope import ScopeEngine, ScopePolicy
-from sric.updater import perform_update
-from sric.graph import GraphEdge, GraphNode, TemporalGraph
-from sric.lineage import EvidenceLineage, LineageRecord
-from sric.notebook import NotebookEntry, ResearchNotebook
 
 from . import __version__
-from .api import create_app
 from .assertions import evaluate
-from .capsule import add_assertion, add_extractor, add_request, add_response, add_workflow_step, build_manifest, initialize_directory, pack, safe_extract, verify_directory
-from .importers import import_curl, import_har, import_raw_http
-from .models import AssertionSpec, ExtractorSpec, RequestRecord, ResponseRecord, WorkflowStep
-from .replay import ReplayError, Replayer
-from .report import write_report
-from .redact import redact_capsule
+from .capsule import add_extractor, add_request, add_response, add_workflow_step
 from .diffing import as_safe_dict, diff_responses
 from .extractors import extract as run_extractor
-from .conformance import check_conformance
-from .matrix import observed_matrix
-from .signing import generate_keypair, sign_manifest, verify_signature
-from .cli import app, import_app, workflow_app, key_app
+from .models import AssertionSpec, ExtractorSpec, RequestRecord, ResponseRecord, WorkflowStep
+from .redact import redact_capsule
+from .replay import ReplayError, Replayer
+from .cli import app
 
 @app.command("replay")
 def replay(
@@ -191,5 +180,3 @@ def extract_value(
         add_extractor(capsule, spec)
     value = result.value if (not sensitive or reveal) else (f"${{{{{name}}}}}" if result.found else None)
     typer.echo(json.dumps({"extractor_id": spec.extractor_id, "name": name, "found": result.found, "value": value, "sensitive": sensitive}, indent=2))
-
-
