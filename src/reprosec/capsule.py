@@ -17,6 +17,10 @@ from .models import (
     WorkflowStep,
     AssertionSpec,
     ExtractorSpec,
+    ActorRecord,
+    SessionRecord,
+    ValidationRecord,
+    CaptureEvent,
 )
 from .security import MAX_ARCHIVE_ENTRIES, MAX_COMPRESSION_RATIO, MAX_TOTAL_UNCOMPRESSED
 
@@ -34,17 +38,20 @@ def _write_json(path: Path, value: object) -> None:
     )
 
 
-def initialize_directory(path: Path, title: str) -> CapsuleMetadata:
+def initialize_directory(path: Path, title: str, workspace_id: str | None = None) -> CapsuleMetadata:
     if path.exists() and any(path.iterdir()):
         raise FileExistsError("capsule directory is not empty")
     path.mkdir(parents=True, exist_ok=True)
     for sub in (
         "actors",
         "environment",
+        "sessions",
         "workflow",
         "requests",
         "responses",
         "evidence",
+        "network",
+        "validation",
         "assertions",
         "extractors",
         "timeline",
@@ -54,14 +61,38 @@ def initialize_directory(path: Path, title: str) -> CapsuleMetadata:
         "reports",
     ):
         (path / sub).mkdir()
-    meta = CapsuleMetadata(title=title)
+    meta = CapsuleMetadata(title=title, workspace_id=workspace_id)
     _write_json(path / "capsule.json", meta.model_dump(mode="json"))
     (path / "capsule.yaml").write_text(
-        f"format: RCAP\nschema_version: '0.2'\ncapsule_id: {meta.capsule_id}\ntitle: {json.dumps(title)}\n",
+        f"format: RCAP\nschema_version: '0.3'\ncapsule_id: {meta.capsule_id}\ntitle: {json.dumps(title)}\n",
         encoding="utf-8",
     )
     return meta
 
+
+
+def add_actor(root: Path, actor: ActorRecord) -> Path:
+    p = root / "actors" / f"{actor.actor_id}.json"
+    _write_json(p, actor.model_dump(mode="json"))
+    return p
+
+
+def add_session(root: Path, session: SessionRecord) -> Path:
+    p = root / "sessions" / f"{session.session_id}.json"
+    _write_json(p, session.model_dump(mode="json"))
+    return p
+
+
+def add_validation(root: Path, validation: ValidationRecord) -> Path:
+    p = root / "validation" / f"{validation.validation_id}.json"
+    _write_json(p, validation.model_dump(mode="json"))
+    return p
+
+
+def add_capture_event(root: Path, event: CaptureEvent) -> Path:
+    p = root / "timeline" / f"{event.event_id}.json"
+    _write_json(p, event.model_dump(mode="json"))
+    return p
 
 def add_request(root: Path, req: RequestRecord) -> Path:
     p = root / "requests" / f"{req.request_id}.json"

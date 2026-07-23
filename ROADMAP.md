@@ -1,14 +1,14 @@
 # Roadmap
 
-## Current — 0.3.x hardening
-RCAP 0.2 compatibility, safe replay with DNS pinning/scope-policy-rate-approval gates, structured redaction, variables/extractors, assertions, semantic diff, binary/streaming evidence, SRIC lineage/notebook/query integration and conformance checks are implemented.
+## Current — 0.4.x hardening
+Implemented: RCAP 0.3 actors/sessions/validation records, authorized bounded HTTP capture, loopback proxy with CONNECT metadata-only behavior, browser recording lifecycle, multi-actor workflows, workflow compiler, semantic differential v2, Burp/ZAP imports, public conformance suite and SRIC 0.4 shared-workspace integration.
 
 Next:
-- Full scoped browser/proxy capture engine with explicit certificate lifecycle.
-- Burp/ZAP import adapters, WebSocket/GraphQL/gRPC evidence records and sanitized browser-state snapshots.
-- Keyring/vault-backed secret bindings and job/SSE integration for long replays/imports.
-- Expanded parser fuzzing/curl compatibility and richer public RCAP conformance suite/REP governance.
-- Optional AI Reproduction Compiler that only emits candidate workflows and never validates findings.
+- Explicit opt-in TLS interception adapter with certificate lifecycle and strict authorization controls; never silent MITM.
+- WebSocket/gRPC evidence records and richer GraphQL workflow semantics.
+- Secret Vault bindings from SRIC for actor/session replay without embedding secrets in RCAP.
+- Long-running import/replay jobs over SRIC Job Engine v2 with resumability and SSE progress.
+- REP governance, larger public conformance corpus and third-party implementation compatibility testing.
 
 ## 1.0
 Stable RCAP schema/governance, migration compatibility, signed releases, external implementations/conformance and audited replay security model.

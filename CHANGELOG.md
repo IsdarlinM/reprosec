@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 - 2026-07-22
+- Added RCAP 0.3 actors, sessions, secret references, network/validation records and backward-compatible conformance.
+- Added bounded authorized capture, loopback HTTP proxy, browser recording lifecycle, multi-actor workflows and candidate workflow compilation.
+- Added semantic differential v2, Burp/ZAP importers and public RCAP conformance fixtures.
+- Upgraded shared integration to SRIC Core 0.4 workspaces, Claim-Evidence contracts, graph/jobs/lineage and secure defaults.
+- Capture remains distinct from validation; CONNECT/TLS interception is never silently enabled.
+
 ## 0.3.0 - 2026-07-21
 - Integrated RCAP evidence with SRIC 0.3 temporal graph, evidence lineage and reproducible research notebook primitives.
 - Added `sync-lineage`, `research-note` and graph `query` commands without changing the RCAP 0.2 schema version.
@@ -37,6 +44,6 @@
 - Workflow steps, deterministic assertions, reports and offline demo.
 - Policy/scope-gated replay with redirect and resolved-IP checks.
 - Explicit redaction preview/apply and privacy-preserving response diff.
-- Built dependency-light static Web UI with functional integrity verification.
+- Built React/Vite Web UI with functional integrity verification.
 - Signed release update primitive inherited from SRIC.
 - Local API, CLI help contract and test suites.

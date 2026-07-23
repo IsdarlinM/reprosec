@@ -50,11 +50,11 @@ jobs:
         working-directory: reprosec
       - run: python scripts/generate-sbom.py --output sbom.cdx.json
         working-directory: reprosec
-      - name: Verify static Web UI assets
+      - name: Verify packaged Web assets
         run: |
           cmp web/index.html src/reprosec/webdist/index.html
-          cmp web/src/main.js src/reprosec/webdist/assets/app.js
-          cmp web/src/styles.css src/reprosec/webdist/assets/styles.css
+          cmp web/main.js src/reprosec/webdist/assets/app.js
+          cmp web/styles.css src/reprosec/webdist/assets/styles.css
         working-directory: reprosec
       - run: python -m build
         working-directory: reprosec

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reprosec.dev/rcap/0.3/capsule.schema.json",
+  "title": "RCAP 0.3 Capsule Metadata",
+  "type": "object",
+  "required": ["format", "schema_version", "capsule_id", "title", "created_at", "created_by", "tool_version"],
+  "properties": {
+    "format": {"const": "RCAP"},
+    "schema_version": {"const": "0.3"},
+    "capsule_id": {"type": "string"},
+    "title": {"type": "string"},
+    "created_at": {"type": "string"},
+    "created_by": {"type": "string"},
+    "tool_version": {"type": "string"},
+    "workspace_id": {"type": ["string", "null"]},
+    "deterministic_replay": {"type": "boolean"},
+    "notes": {"type": "string"}
+  },
+  "additionalProperties": false
+}

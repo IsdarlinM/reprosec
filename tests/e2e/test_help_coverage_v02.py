@@ -1,7 +1,8 @@
 from typer.main import get_command
 from typer.testing import CliRunner
 
-from reprosec.cli import app, normalize_help_argv
+from reprosec.cli_vnext import app
+from reprosec.cli import normalize_help_argv
 
 runner = CliRunner()
 

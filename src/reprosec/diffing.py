@@ -82,3 +82,57 @@ def diff_responses(expected: ResponseRecord, observed: ResponseRecord, *, semant
 
 def as_safe_dict(diff: ResponseDiff) -> dict[str, object]:
     return asdict(diff)
+
+
+@dataclass(frozen=True)
+class ResponseDiffV2:
+    base: ResponseDiff
+    cookies_added: list[str]
+    cookies_removed: list[str]
+    redirects_changed: bool
+    expected_redirects: list[str]
+    observed_redirects: list[str]
+    timing_delta_ms: float | None
+    http_version_changed: bool
+    tls_version_changed: bool
+    peer_changed: bool
+    graphql_changes: list[str]
+    authorization_relevant: list[str]
+
+
+def _cookie_names(record: ResponseRecord) -> set[str]:
+    names=set()
+    for header in record.headers:
+        if header.name.lower()=="set-cookie":
+            name=header.value.split("=",1)[0].strip()
+            if name:names.add(name)
+    return names
+
+
+def diff_responses_v2(expected: ResponseRecord, observed: ResponseRecord) -> ResponseDiffV2:
+    base=diff_responses(expected,observed,semantic=True)
+    exp_c=_cookie_names(expected);obs_c=_cookie_names(observed)
+    exp_net=expected.network;obs_net=observed.network
+    timing=None
+    if exp_net and obs_net and exp_net.duration_ms is not None and obs_net.duration_ms is not None:
+        timing=round(obs_net.duration_ms-exp_net.duration_ms,3)
+    graphql=[]
+    if base.semantic_type=="json" and base.semantic_changes:
+        graphql=[x for x in base.semantic_changes if any(k in x.casefold() for k in ("data","errors","extensions"))]
+    auth=[]
+    if expected.status_code!=observed.status_code:auth.append("status changed")
+    sensitive_terms=("owner","tenant","role","permission","email","token","secret","billing","private")
+    for change in base.semantic_changes or []:
+        if any(term in change.casefold() for term in sensitive_terms):auth.append(change)
+    if exp_c!=obs_c:auth.append("session/security cookie set changed")
+    return ResponseDiffV2(
+        base=base,
+        cookies_added=sorted(obs_c-exp_c),cookies_removed=sorted(exp_c-obs_c),
+        redirects_changed=expected.redirect_chain!=observed.redirect_chain,
+        expected_redirects=list(expected.redirect_chain),observed_redirects=list(observed.redirect_chain),
+        timing_delta_ms=timing,
+        http_version_changed=bool(exp_net and obs_net and exp_net.http_version!=obs_net.http_version),
+        tls_version_changed=bool(exp_net and obs_net and exp_net.tls_version!=obs_net.tls_version),
+        peer_changed=bool(exp_net and obs_net and exp_net.peer_ip!=obs_net.peer_ip),
+        graphql_changes=graphql,authorization_relevant=sorted(set(auth)),
+    )

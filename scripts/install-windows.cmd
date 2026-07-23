@@ -8,17 +8,23 @@ set "CONSTRAINTS=%REPO_ROOT%\requirements\runtime-py311.lock"
 set "INSTALL_ROOT=%LOCALAPPDATA%\ReproSec"
 set "VENV=%INSTALL_ROOT%\venv"
 set "BIN_DIR=%USERPROFILE%\.local\bin"
+
 where py >nul 2>&1
 if not errorlevel 1 (set "PY_CMD=py -3.11") else (where python >nul 2>&1 || (echo Python 3.11+ is required.& exit /b 2)& set "PY_CMD=python")
 %PY_CMD% -c "import sys; raise SystemExit(0 if sys.version_info >= (3,11) else 1)" >nul 2>&1
 if errorlevel 1 (echo Python 3.11+ is required.& exit /b 2)
 if not exist "%INSTALL_ROOT%" mkdir "%INSTALL_ROOT%"
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%"
-if not exist "%VENV%\Scripts\python.exe" (%PY_CMD% -m venv "%VENV%" || exit /b 1)
+if not exist "%VENV%\Scripts\python.exe" %PY_CMD% -m venv "%VENV%" || exit /b 1
 "%VENV%\Scripts\python.exe" -m pip install --upgrade pip || exit /b 1
 set "SRIC_SOURCE=%SRIC_CORE_SOURCE%"
 if not defined SRIC_SOURCE if exist "%REPO_ROOT%\..\sric-core\pyproject.toml" set "SRIC_SOURCE=%REPO_ROOT%\..\sric-core"
-if defined SRIC_SOURCE ("%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%SRIC_SOURCE%" || exit /b 3) else ("%VENV%\Scripts\python.exe" -m pip install -c "%CONSTRAINTS%" "sric-core>=0.3,<0.4" || exit /b 3)
+if defined SRIC_SOURCE (
+  "%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%SRIC_SOURCE%" || exit /b 3
+) else (
+  "%VENV%\Scripts\python.exe" -m pip install -c "%CONSTRAINTS%" "sric-core>=0.4,<0.5"
+  if errorlevel 1 (echo SRIC Core 0.4.x is required. Clone sric-core next to this repository or set SRIC_CORE_SOURCE=C:\path\to\sric-core.& exit /b 3)
+)
 "%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%REPO_ROOT%" || exit /b 1
 >"%BIN_DIR%\%CMD%.cmd" echo @"%VENV%\Scripts\%CMD%.exe" %%*
 for /f "tokens=2,*" %%A in ('reg query HKCU\Environment /v Path 2^>nul ^| findstr /I "Path"') do set "USER_PATH=%%B"

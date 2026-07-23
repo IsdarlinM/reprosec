@@ -281,3 +281,81 @@ def import_curl(command: str) -> RequestRecord:
         redacted=changed,
         import_metadata=metadata,
     )
+
+
+def import_burp_xml(path: Path) -> tuple[list[RequestRecord], list[ResponseRecord]]:
+    """Import Burp XML export as data only; no requests are executed."""
+    import xml.etree.ElementTree as ET
+    raw = _read_limited(path)
+    if b"<!DOCTYPE" in raw.upper() or b"<!ENTITY" in raw.upper():
+        raise ValueError("DTD/entities are not allowed in Burp XML imports")
+    root = ET.fromstring(raw)
+    requests: list[RequestRecord] = []
+    responses: list[ResponseRecord] = []
+    for item in root.findall(".//item"):
+        url = (item.findtext("url") or "").strip()
+        if not url:
+            continue
+        validate_external_url(url)
+        req_elem = item.find("request")
+        if req_elem is None:
+            continue
+        req_raw = req_elem.text or ""
+        if req_elem.attrib.get("base64", "false").lower() == "true":
+            req_bytes = base64.b64decode(req_raw, validate=True)
+            req_text = req_bytes.decode("utf-8", errors="replace")
+        else:
+            req_text = req_raw
+        with Path(path.parent / f".reprosec-burp-{len(requests)}.tmp").open("w", encoding="utf-8") as fh:
+            fh.write(req_text)
+            tmp_path = Path(fh.name)
+        try:
+            request = import_raw_http(tmp_path, scheme=urlsplit(url).scheme or "https", host=urlsplit(url).netloc)
+        finally:
+            tmp_path.unlink(missing_ok=True)
+        request.url = redact_url(url).text
+        request.import_metadata = {"format": "burp-xml"}
+        requests.append(request)
+        res_elem = item.find("response")
+        status_text = item.findtext("status") or ""
+        if res_elem is None or not status_text.isdigit():
+            continue
+        res_raw = res_elem.text or ""
+        if res_elem.attrib.get("base64", "false").lower() == "true":
+            res_bytes = base64.b64decode(res_raw, validate=True)
+            res_text = res_bytes.decode("utf-8", errors="replace")
+        else:
+            res_text = res_raw
+        head, _, body = res_text.replace("\r\n", "\n").partition("\n\n")
+        header_rows=[]
+        for line in head.splitlines()[1:]:
+            if ":" in line:
+                n,v=line.split(":",1);header_rows.append({"name":n.strip(),"value":v.strip()})
+        hs, changed = _redact_headers(header_rows)
+        rr = redact_body(body, _content_type(header_rows)) if body else None
+        body_out = rr.text if rr else None
+        responses.append(ResponseRecord(request_id=request.request_id,status_code=int(status_text),headers=hs,body=body_out,body_size_bytes=len((body_out or "").encode()),body_sha256=hashlib.sha256((body_out or "").encode()).hexdigest(),redacted=changed or bool(rr and rr.detected)))
+    return requests, responses
+
+
+def import_zap_json(path: Path) -> tuple[list[RequestRecord], list[ResponseRecord]]:
+    """Import a bounded ZAP JSON message export or HAR-shaped export."""
+    raw = json.loads(_read_limited(path))
+    if isinstance(raw, dict) and isinstance(raw.get("log"), dict):
+        return import_har(path)
+    messages = raw.get("messages", []) if isinstance(raw, dict) else []
+    if not isinstance(messages, list):
+        raise ValueError("invalid ZAP JSON: messages must be a list")
+    requests=[];responses=[]
+    for message in messages:
+        if not isinstance(message,dict): continue
+        req_raw=message.get("request")
+        if not isinstance(req_raw,str): continue
+        tmp=path.parent/f".reprosec-zap-{len(requests)}.tmp";tmp.write_text(req_raw,encoding="utf-8")
+        try:req=import_raw_http(tmp,scheme=str(message.get("scheme","https")),host=message.get("host"))
+        finally:tmp.unlink(missing_ok=True)
+        req.import_metadata={"format":"zap-json"};requests.append(req)
+        status=int(message.get("status",0) or 0)
+        if 100<=status<=599:
+            body=str(message.get("response_body") or "");responses.append(ResponseRecord(request_id=req.request_id,status_code=status,body=redact_body(body,message.get("response_content_type")).text if body else None,redacted=bool(body)))
+    return requests,responses

@@ -2,17 +2,18 @@
 
 ```text
 REPROSEC CAPSULE
-imr :: v0.3.0
+imr :: v0.4.0
 ```
 
 ReproSec is the reference implementation of `.rcap`: an open, deterministic container for portable and reproducible security evidence.
 
 > **AI proposes. Evidence proves. Humans control.**
 
-ReproSec does not treat an LLM inference as a confirmed vulnerability. It preserves observations, workflows, assertions, provenance and replay evidence so that humans can validate conclusions deterministically.
+ReproSec does not treat an LLM inference as a confirmed vulnerability. It preserves observations, workflows, assertions, provenance and replay evidence so a conclusion can be traced back to verifiable data.
 
-## v0.3 capabilities
+## What v0.4.0 implements
 
+- RCAP 0.3 with actors, sessions, secret references, network/validation records, plus retained compatibility material for RCAP 0.1/0.2.
 - Deterministic `.rcap` packing, SHA-256 manifests, Ed25519 signing and verification.
 - Safe archive extraction with traversal, symlink, entry-count, decompression-size and compression-ratio controls.
 - HAR, raw HTTP and expanded non-executing `curl` import.
@@ -33,12 +34,14 @@ ReproSec does not treat an LLM inference as a confirmed vulnerability. It preser
 - Read-only timeline, evidence lineage (`explain`) and observed actor/operation matrix (`UNKNOWN` is never treated as a vulnerability).
 - RCAP conformance checks for layout, integrity and deterministic packing.
 - Local audit trail in `provenance/audit.jsonl`, with target secret redaction.
-- Single-interaction authorized `capture` command using the same safety gates.
-- FastAPI local API and dependency-light static Web UI with functional integrity, workspace inspection, redaction preview and timeline views.
+- Authorized bounded HTTP capture, loopback capture proxy and browser-event recorder using the same safety gates; CONNECT/TLS is recorded as tunnel metadata and is not silently MITM-intercepted.
+- FastAPI local API and dependency-light responsive Web UI with integrity, workspace inspection, redaction preview, timeline and runtime capability views.
 - Signed release update primitive; no blind production `git pull`.
 - Offline synthetic demo requiring no API keys and making zero network requests.
-- SRIC 0.3 evidence-lineage/graph synchronization (`sync-lineage`), reproducible research notes and shared graph queries.
-- RCAP schema version remains independently versioned at Draft 0.2; tool upgrades do not silently rewrite historical evidence formats.
+- SRIC 0.4 evidence-lineage/graph synchronization (`sync-lineage`), reproducible research notes and shared graph queries.
+- RCAP remains independently versioned at 0.3; tool upgrades do not silently rewrite historical evidence formats.
+- Multi-actor/session workflows, candidate workflow compiler, semantic differential v2, Burp/ZAP imports and a public conformance suite are implemented.
+- Capsules can link to a shared SRIC 0.4 workspace by opaque `workspace_id` without embedding workspace secrets.
 
 ## Install for development
 
@@ -83,77 +86,25 @@ Imported curl commands are parsed as untrusted data and are **never executed**. 
 
 ## Safe replay
 
-Read-only request:
-
 ```bash
-reprosec replay case1 REQ-... \
-  --allow '*.example.com' \
-  --allow-method GET
+reprosec replay case1 REQ-... --allow '*.example.com' --allow-method GET
 ```
 
 An authorized mutating request needs both method scope and human approval:
 
 ```bash
-reprosec replay case1 REQ-... \
-  --allow 'api.example.com' \
-  --allow-method POST \
-  --approve-action
+reprosec replay case1 REQ-... --allow 'api.example.com' --allow-method POST --approve-action
 ```
 
-Bind a redacted value only in memory:
+Bind a redacted value only in memory with `--bind`; loopback/private networks remain blocked unless explicitly allowlisted for an authorized lab. Redirects are opt-in and every followed destination is re-evaluated through scope and DNS/network policy.
+
+## Capture authorized evidence
 
 ```bash
-reprosec replay case1 REQ-... \
-  --allow 'api.example.com' \
-  --bind REDACTED_AUTHORIZATION_1='Bearer ...'
+reprosec capture request case1 GET https://example.com/health --allow example.com
 ```
 
-Loopback/private networks remain blocked unless explicitly allowed for an authorized lab:
-
-```bash
-reprosec replay case1 REQ-... \
-  --allow 127.0.0.1 \
-  --allow-network 127.0.0.0/8
-```
-
-Redirects are not followed unless `--follow-redirects` is provided. Every followed destination is re-evaluated through scope and DNS/network policy.
-
-## Capture one authorized interaction
-
-```bash
-reprosec capture case1 https://example.com/health \
-  --allow example.com \
-  --allow-method GET
-```
-
-This is a gated direct HTTP capture, **not yet a browser/MITM proxy capture engine**.
-
-## Deterministic extractors
-
-```bash
-reprosec extract case1 RES-... DOCUMENT_ID jsonpath '$.document.id'
-reprosec extract case1 RES-... SESSION cookie session --sensitive
-```
-
-Sensitive extracted values are not printed unless explicitly requested with `--reveal`.
-
-## Semantic diff and assertions
-
-```bash
-reprosec diff case1 RES-EXPECTED RES-OBSERVED --semantic
-reprosec assertion case1 REQ-... jsonpath_equals A --selector '$.actor.id'
-reprosec check case1 AST-... RES-...
-```
-
-Semantic diff reports paths and change types without echoing changed JSON values.
-
-## Network diagnostics
-
-```bash
-reprosec doctor --network
-```
-
-The network diagnostic checks DNS prerequisites and reports proxy environment presence without sending an HTTP request to a target.
+ReproSec v0.4 also provides a loopback HTTP capture proxy and controlled browser-event recorder. CONNECT/TLS is metadata-only by default; silent MITM is never enabled. Capture remains evidence acquisition, not validation.
 
 ## Web UI
 
@@ -161,7 +112,7 @@ The network diagnostic checks DNS prerequisites and reports proxy environment pr
 reprosec web
 ```
 
-The v0.3 UI is local-loopback only. Non-loopback binding remains denied until authenticated TLS mode is implemented.
+The v0.4 UI is local-loopback only. Non-loopback binding remains denied until authenticated TLS mode is implemented.
 
 ## Security and privacy defaults
 
@@ -171,13 +122,11 @@ The v0.3 UI is local-loopback only. Non-loopback binding remains denied until au
 - Environment HTTP proxies: **ignored by replay**.
 - Non-loopback Web/API exposure: **denied**.
 - Imported content: **untrusted data, never instructions**.
-- Required replay secrets: **explicit ephemeral bindings or future approved secret providers; never silently omitted**.
+- Required replay secrets: **explicit ephemeral bindings or approved secret providers; never silently omitted**.
 
-See `SECURITY.md`, `PRIVACY.md`, `docs/security/threat-model.md`, `spec/RCAP-0.2.md` and `IMPLEMENTATION_STATUS.md` in the foundation bundle for exact boundaries.
+## Known v0.4 limits
 
-## Known v0.3 limits
-
-Not yet claimed as complete: full browser/MITM capture, Burp/ZAP adapters, WebSocket/GraphQL/gRPC records, browser-state snapshots, full CLI/Web parity, secure vault/keyring integration, job/SSE streaming, AI Reproduction Compiler, full REP governance, authenticated non-loopback collaboration and official embedded release trust roots.
+Not yet claimed as complete: opt-in TLS interception with certificate lifecycle, full WebSocket/gRPC evidence capture, rich browser-state snapshots, complete SRIC Secret Vault replay bindings, long-running job/SSE orchestration for all operations, AI Reproduction Compiler, full REP governance, authenticated non-loopback collaboration and official embedded release trust roots.
 
 ## Ethics
 

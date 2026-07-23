@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"RCAP Actor","type":"object","required":["actor_id","label","actor_type"],"properties":{"actor_id":{"type":"string"},"label":{"type":"string"},"actor_type":{"type":"string"},"metadata":{"type":"object"}},"additionalProperties":false}
