@@ -32,7 +32,7 @@ dev = [
 ]
 
 [project.scripts]
-reprosec = "reprosec.cli_vnext:run"
+reprosec = "reprosec.cli_all:run"
 
 [tool.setuptools.packages.find]
 where = ["src"]
