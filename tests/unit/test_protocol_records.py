@@ -12,7 +12,6 @@ from reprosec.protocols import (
     WebSocketOpcode,
 )
 
-
 HASH = hashlib.sha256(b"payload").hexdigest()
 
 
@@ -30,9 +29,48 @@ def test_websocket_frame_preserves_bounded_evidence_metadata() -> None:
         frame_index=0,
         opcode=WebSocketOpcode.TEXT,
     )
-
     assert record.protocol is ProtocolKind.WEBSOCKET
     assert record.truncated is True
+
+
+def test_protocol_subclasses_reject_mismatched_discriminators() -> None:
+    with pytest.raises(ValueError):
+        WebSocketFrameRecord(
+            record_id="WS-X",
+            protocol=ProtocolKind.GRPC,
+            connection_id="CONN-1",
+            direction=Direction.SERVER_TO_CLIENT,
+            evidence_ids=["E-1"],
+            provenance_source="capture",
+            frame_index=0,
+            opcode=WebSocketOpcode.TEXT,
+        )
+    with pytest.raises(ValueError):
+        GrpcMessageRecord(
+            record_id="G-X",
+            protocol=ProtocolKind.GRAPHQL,
+            connection_id="CONN-1",
+            direction=Direction.CLIENT_TO_SERVER,
+            evidence_ids=["E-1"],
+            provenance_source="capture",
+            service="demo.Service",
+            method="Get",
+            stream_index=0,
+        )
+
+
+def test_close_metadata_requires_close_opcode() -> None:
+    with pytest.raises(ValueError, match="CLOSE WebSocket opcode"):
+        WebSocketFrameRecord(
+            record_id="WS-X",
+            connection_id="CONN-1",
+            direction=Direction.SERVER_TO_CLIENT,
+            evidence_ids=["E-1"],
+            provenance_source="capture",
+            frame_index=0,
+            opcode=WebSocketOpcode.TEXT,
+            close_code=1000,
+        )
 
 
 def test_grpc_metadata_stores_keys_not_secret_values() -> None:
@@ -47,7 +85,6 @@ def test_grpc_metadata_stores_keys_not_secret_values() -> None:
         stream_index=0,
         metadata_keys=["authorization", "x-request-id"],
     )
-
     assert record.protocol is ProtocolKind.GRPC
     assert record.metadata_keys == ["authorization", "x-request-id"]
 
@@ -64,7 +101,6 @@ def test_graphql_subscription_event_is_typed() -> None:
         document_sha256=HASH,
         subscription_event_index=2,
     )
-
     assert record.protocol is ProtocolKind.GRAPHQL
     assert record.subscription_event_index == 2
 
