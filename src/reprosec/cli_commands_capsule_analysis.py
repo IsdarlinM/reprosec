@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import typer
+from pydantic import ValidationError
 
 from .capsule_analysis import CapsuleSnapshot, compare_capsules, plan_minimization
 from .cli import CTX, app
@@ -18,9 +19,9 @@ app.add_typer(capsule_analysis_app, name="capsule-analysis")
 def _read_snapshot(path: Path) -> CapsuleSnapshot:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise typer.BadParameter(f"cannot read valid JSON from {path}: {exc}") from exc
-    return CapsuleSnapshot.model_validate(raw)
+        return CapsuleSnapshot.model_validate(raw)
+    except (OSError, json.JSONDecodeError, ValidationError) as exc:
+        raise typer.BadParameter(f"cannot read a valid capsule snapshot from {path}: {exc}") from exc
 
 
 @capsule_analysis_app.command("compare")
@@ -30,7 +31,6 @@ def compare_command(
     include_unchanged: bool = typer.Option(False, "--include-unchanged"),
 ) -> None:
     """Compare deterministic artifact manifests without inferring impact."""
-
     report = compare_capsules(
         _read_snapshot(before),
         _read_snapshot(after),
@@ -45,11 +45,14 @@ def minimize_plan_command(
     root_artifact: list[str] = typer.Option(..., "--root-artifact"),
 ) -> None:
     """Plan dependency-safe retention; never mutate the capsule."""
-
-    report = plan_minimization(
-        _read_snapshot(snapshot),
-        root_artifact_ids=root_artifact,
-    )
+    try:
+        report = plan_minimization(
+            _read_snapshot(snapshot),
+            root_artifact_ids=root_artifact,
+        )
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(2) from exc
     typer.echo(report.model_dump_json(indent=2))
     if report.missing_references:
         raise typer.Exit(2)
