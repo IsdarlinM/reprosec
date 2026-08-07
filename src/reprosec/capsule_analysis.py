@@ -128,7 +128,7 @@ def compare_capsules(
                 if getattr(left, key) != getattr(right, key)
             )
             change = ManifestChange.MODIFIED if fields else ManifestChange.UNCHANGED
-        if include_unchanged or change is not ManifestChange.UNCHANGED:
+        if include_unchanged or change != ManifestChange.UNCHANGED:
             changes.append(
                 CapsuleArtifactChange(
                     artifact_id=artifact_id,
@@ -141,7 +141,7 @@ def compare_capsules(
                 )
             )
     summary = {
-        change.value: sum(item.change is change for item in changes)
+        change.value: sum(item.change == change for item in changes)
         for change in ManifestChange
     }
     return CapsuleComparison(
@@ -152,7 +152,7 @@ def compare_capsules(
         summary=summary,
         limitations=[
             "A capsule difference is evidence of changed content, not proof of security impact.",
-            "Semantic equivalence may require deterministic assertions and workflow context."
+            "Semantic equivalence may require deterministic assertions and workflow context.",
         ],
     )
 
@@ -162,6 +162,8 @@ def plan_minimization(
     *,
     root_artifact_ids: Sequence[str],
 ) -> CapsuleMinimizationPlan:
+    if not root_artifact_ids:
+        raise ValueError("at least one root artifact ID is required")
     artifacts = {item.artifact_id: item for item in snapshot.artifacts}
     missing_roots = sorted(set(root_artifact_ids) - set(artifacts))
     if missing_roots:
@@ -200,6 +202,6 @@ def plan_minimization(
         limitations=[
             "The plan is non-mutating and must be reviewed before creating a new capsule.",
             "Required integrity/provenance artifacts are always retained.",
-            "Sensitive retained artifacts require redaction review before export."
+            "Sensitive retained artifacts require redaction review before export.",
         ],
     )
