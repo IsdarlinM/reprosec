@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -80,7 +81,7 @@ class ProtocolEvidenceRecord(BaseModel):
 
 
 class WebSocketFrameRecord(ProtocolEvidenceRecord):
-    protocol: ProtocolKind = ProtocolKind.WEBSOCKET
+    protocol: Literal[ProtocolKind.WEBSOCKET] = ProtocolKind.WEBSOCKET
     frame_index: int = Field(ge=0)
     opcode: WebSocketOpcode
     final_fragment: bool = True
@@ -88,9 +89,17 @@ class WebSocketFrameRecord(ProtocolEvidenceRecord):
     close_code: int | None = Field(default=None, ge=0, le=4999)
     close_reason_redacted: str | None = None
 
+    @model_validator(mode="after")
+    def close_metadata_semantics(self) -> "WebSocketFrameRecord":
+        if self.opcode is not WebSocketOpcode.CLOSE and (
+            self.close_code is not None or self.close_reason_redacted is not None
+        ):
+            raise ValueError("close metadata requires a CLOSE WebSocket opcode")
+        return self
+
 
 class GrpcMessageRecord(ProtocolEvidenceRecord):
-    protocol: ProtocolKind = ProtocolKind.GRPC
+    protocol: Literal[ProtocolKind.GRPC] = ProtocolKind.GRPC
     service: str
     method: str
     stream_index: int = Field(ge=0)
@@ -102,7 +111,7 @@ class GrpcMessageRecord(ProtocolEvidenceRecord):
 
 
 class GraphQLOperationRecord(ProtocolEvidenceRecord):
-    protocol: ProtocolKind = ProtocolKind.GRAPHQL
+    protocol: Literal[ProtocolKind.GRAPHQL] = ProtocolKind.GRAPHQL
     operation_kind: GraphQLOperationKind
     operation_name: str | None = None
     document_sha256: str | None = None
