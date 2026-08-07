@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1 - 2026-08-06
+- Added deterministic replay stability analysis across repeated observations.
+- Added explicit normalization policies for volatile headers, JSON paths and regex-defined dynamic values.
+- Added response fingerprints, dominant-sample measurement, flakiness scoring and retained volatile-field reporting.
+- Unstable sample sets now explicitly state that assertions must not create `VALIDATED` findings.
+- Added regression tests for request IDs, timestamps, dynamic JSON, status-code variation, regex normalization and minimum sample counts.
+- Replaced hosted GitHub Actions/Dependabot automation with the cross-platform local Sentinel Forge release gate.
+- Updated the SRIC dependency floor to 0.4.1 and added local build/dependency-audit tooling.
+
 ## 0.4.0 - 2026-07-22
 - Added RCAP 0.3 actors, sessions, secret references, network/validation records and backward-compatible conformance.
 - Added bounded authorized capture, loopback HTTP proxy, browser recording lifecycle, multi-actor workflows and candidate workflow compilation.

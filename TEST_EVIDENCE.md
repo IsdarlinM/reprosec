@@ -1,22 +1,40 @@
-# Test Evidence — reprosec v0.4.0
+# Test Evidence — ReproSec v0.4.1
 
-Validated on 2026-07-22 as part of the Sentinel Forge vNext release gate.
+## QA pass — 2026-08-07
 
-- pytest: **68 tests passed**
-- Python compileall: **PASS**
-- project security scan: **PASS**
-- CLI registered-command help coverage: **PASS** (`--help`, `-h`; 51 registered ReproSec command paths)
-- synthetic/local functional smoke: **PASS**
-- YAML parse validation: **PASS** as part of the 42-file ecosystem gate
-- wheel build: **PASS**
-- isolated wheel smoke against the validated runtime dependency layer: **PASS**
-- static Web source/package byte-integrity: **PASS**
+Freshly executed in the current local runtime:
 
-Ecosystem-wide validated totals after CLI modularization: **208 tests passed** across six repositories and **263 registered CLI command paths** passed `--help`/`-h` coverage.
+- Sentinel Forge cross-product high-risk regression matrix including ReproSec capsule minimization, replay stability and passive protocol records: **7/7 matrix tests passed**;
+- Python `compileall` over the reconstructed corrected modules: **PASS**;
+- branch comparison against `main`: branch is ahead and **0 commits behind** at the time of this audit.
 
-## Explicit environment limitations
+Current-source review and regression tests added in this pass cover:
 
-- Fresh dependency-resolving installation was blocked by the environment package index lacking required current packages such as `fastapi>=0.128`; wheel construction passed.
-- Ruff, mypy and pip-audit were unavailable from the local runtime/index for a fresh rerun; CI remains configured to run them where dependencies are available.
-- Windows `.cmd` installers were not executable in this Linux runtime; Linux shell installer syntax was validated with `sh -n`.
-- Real-browser E2E is not claimed from this runtime; API/Web/CSP/MIME integration tests are covered by automated suites.
+- explicit minimization roots and transitive retention;
+- case-insensitive HTTP `Content-Type` handling;
+- invalid regex rejection;
+- protocol subtype discriminators and WebSocket CLOSE metadata;
+- stability/protocol/minimization API errors returning controlled 422 responses;
+- `capsule-analysis` being registered in the installed CLI;
+- precision/protocol/capsule CLI validation returning controlled exit codes instead of tracebacks;
+- recursive `--help`, `-h` and trailing `COMMAND help` coverage through the final entrypoint;
+- `reprosec web` serving the vNext API, including capsule-analysis routes;
+- public Python exports for capsule comparison/minimization.
+
+## Current release-gate status
+
+**FULL CURRENT REPOSITORY GATE NOT EXECUTABLE IN THIS RUNTIME.**
+
+The repository is private and this runtime cannot materialize a complete checkout from GitHub; individual authenticated blobs are available only through the connector. Ruff, mypy, `build` and `pip-audit` are unavailable and cannot be installed from the environment package index. No GitHub Actions, Codespaces or paid/hosted GitHub execution was used.
+
+The complete exact-commit gate must still be run from a sibling local checkout before treating v0.4.1 as a fully validated release:
+
+```bash
+python -m pip install -e ../sric-core
+python -m pip install -e '.[dev]'
+python scripts/release-gate.py
+```
+
+## Previous validated baseline
+
+The previous v0.4.0 state was recorded on 2026-07-22 with **68 pytest tests passed**, compileall/security scan/CLI help/synthetic smoke/build/isolated wheel smoke all PASS. Those results are a regression baseline only and do not prove v0.4.1.
