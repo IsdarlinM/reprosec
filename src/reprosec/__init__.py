@@ -1,5 +1,15 @@
 """ReproSec Capsule reference implementation."""
 
+from .capsule_analysis import (
+    CapsuleArtifact,
+    CapsuleArtifactChange,
+    CapsuleComparison,
+    CapsuleMinimizationPlan,
+    CapsuleSnapshot,
+    ManifestChange,
+    compare_capsules,
+    plan_minimization,
+)
 from .controls import (
     ControlRole,
     DifferentialDesignPolicy,
@@ -17,14 +27,14 @@ from .protocols import (
     WebSocketFrameRecord,
     WebSocketOpcode,
 )
-from .stability import (
-    ReplayObservation,
-    StabilityPolicy,
-    StabilityReport,
-    analyze_stability,
-)
+from .stability import ReplayObservation, StabilityPolicy, StabilityReport, analyze_stability
 
 __all__ = [
+    "CapsuleArtifact",
+    "CapsuleArtifactChange",
+    "CapsuleComparison",
+    "CapsuleMinimizationPlan",
+    "CapsuleSnapshot",
     "ControlRole",
     "DifferentialDesignPolicy",
     "DifferentialDesignReport",
@@ -33,6 +43,7 @@ __all__ = [
     "GraphQLOperationKind",
     "GraphQLOperationRecord",
     "GrpcMessageRecord",
+    "ManifestChange",
     "ProtocolEvidenceRecord",
     "ProtocolKind",
     "ReplayObservation",
@@ -42,5 +53,7 @@ __all__ = [
     "WebSocketOpcode",
     "analyze_stability",
     "assess_differential_design",
+    "compare_capsules",
+    "plan_minimization",
 ]
 __version__ = "0.4.1"
