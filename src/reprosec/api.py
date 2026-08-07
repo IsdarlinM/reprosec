@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+from collections.abc import Awaitable, Callable
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
@@ -9,6 +10,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.requests import Request
+from starlette.responses import Response as StarletteResponse
 
 from . import __version__
 from .capsule import safe_extract, verify_archive
@@ -112,7 +115,10 @@ def create_app() -> FastAPI:
     )
 
     @app.middleware("http")
-    async def headers(request, call_next):
+    async def headers(
+        request: Request,
+        call_next: Callable[[Request], Awaitable[StarletteResponse]],
+    ) -> StarletteResponse:
         response = await call_next(request)
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; object-src 'none'; base-uri 'none'; "
@@ -131,7 +137,7 @@ def create_app() -> FastAPI:
         )
 
     @app.get("/", include_in_schema=False)
-    async def web_index():
+    async def web_index() -> FileResponse | JSONResponse:
         index = web_root / "index.html"
         if index.is_file():
             return FileResponse(index)
@@ -243,7 +249,7 @@ def create_app() -> FastAPI:
     async def protocol_validate(
         request: ProtocolValidationRequest,
     ) -> dict[str, object]:
-        model = {
+        model: type[BaseModel] = {
             ProtocolKind.WEBSOCKET: WebSocketFrameRecord,
             ProtocolKind.GRPC: GrpcMessageRecord,
             ProtocolKind.GRAPHQL: GraphQLOperationRecord,
@@ -252,7 +258,7 @@ def create_app() -> FastAPI:
         return {
             "protocol": request.kind.value,
             "records": len(records),
-            "record_ids": [item.record_id for item in records],
+            "record_ids": [str(item.record_id) for item in records],
             "passive_only": True,
             "executed": False,
         }
