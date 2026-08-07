@@ -24,8 +24,9 @@ app.add_typer(workflow_app, name="workflow")
 app.add_typer(key_app, name="key")
 
 from . import cli_commands_basic as _cli_commands_basic  # noqa: E402,F401
-from . import cli_commands_replay as _cli_commands_replay  # noqa: E402,F401
 from . import cli_commands_evidence as _cli_commands_evidence  # noqa: E402,F401
+from . import cli_commands_precision as _cli_commands_precision  # noqa: E402,F401
+from . import cli_commands_replay as _cli_commands_replay  # noqa: E402,F401
 from . import cli_commands_runtime as _cli_commands_runtime  # noqa: E402,F401
 
 
