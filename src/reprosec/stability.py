@@ -6,7 +6,7 @@ import re
 from collections import Counter
 from typing import Any, Sequence
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 DEFAULT_VOLATILE_HEADERS = {
@@ -39,6 +39,18 @@ class StabilityPolicy(BaseModel):
     regex_substitutions: list[tuple[str, str]] = Field(default_factory=list)
     minimum_samples: int = Field(default=3, ge=2, le=100)
     maximum_flakiness: float = Field(default=0.0, ge=0.0, le=1.0)
+
+    @field_validator("regex_substitutions")
+    @classmethod
+    def validate_regex_substitutions(
+        cls, value: list[tuple[str, str]]
+    ) -> list[tuple[str, str]]:
+        for pattern, _ in value:
+            try:
+                re.compile(pattern)
+            except re.error as exc:
+                raise ValueError(f"invalid regex substitution pattern: {pattern}") from exc
+        return value
 
 
 class StabilityReport(BaseModel):
@@ -92,6 +104,14 @@ def _flatten_json(value: Any, prefix: str = "") -> dict[str, str]:
     return output
 
 
+def _header_value(headers: dict[str, str], name: str) -> str:
+    wanted = name.lower()
+    for key, value in headers.items():
+        if key.lower() == wanted:
+            return value
+    return ""
+
+
 def _canonical_body(
     observation: ReplayObservation, policy: StabilityPolicy
 ) -> tuple[str, dict[str, str]]:
@@ -99,7 +119,7 @@ def _canonical_body(
     for pattern, replacement in policy.regex_substitutions:
         body = re.sub(pattern, replacement, body)
     content_type = (
-        observation.content_type or observation.headers.get("content-type", "")
+        observation.content_type or _header_value(observation.headers, "content-type")
     ).lower()
     if "json" not in content_type:
         return body, {}
@@ -154,9 +174,7 @@ def analyze_stability(
     normalized_headers = [
         _canonical_headers(item, active_policy) for item in observations
     ]
-    stable_headers = all(
-        item == normalized_headers[0] for item in normalized_headers[1:]
-    )
+    stable_headers = all(item == normalized_headers[0] for item in normalized_headers[1:])
     header_names = sorted({name for item in normalized_headers for name in item})
     volatile_headers = [
         name
@@ -184,17 +202,11 @@ def analyze_stability(
     if volatile_headers:
         reasons.append("Volatile retained headers: " + ", ".join(volatile_headers) + ".")
     if volatile_paths:
-        reasons.append(
-            "Volatile retained JSON paths: " + ", ".join(volatile_paths) + "."
-        )
+        reasons.append("Volatile retained JSON paths: " + ", ".join(volatile_paths) + ".")
     if not deterministic:
-        reasons.append(
-            "Assertions must not create VALIDATED findings from this sample set."
-        )
+        reasons.append("Assertions must not create VALIDATED findings from this sample set.")
     else:
-        reasons.append(
-            "The normalized sample set is stable enough for deterministic assertions."
-        )
+        reasons.append("The normalized sample set is stable enough for deterministic assertions.")
 
     return StabilityReport(
         sample_count=len(observations),
