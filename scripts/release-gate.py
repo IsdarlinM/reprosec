@@ -73,8 +73,14 @@ def wheel_smoke(wheel: Path, scripts: list[str], *, offline: bool) -> list[dict[
             return results
         python = venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         command = [str(python), "-m", "pip", "install"]
+        wheelhouse = os.environ.get("SENTINEL_FORGE_WHEELHOUSE")
+        if wheelhouse:
+            command.extend(["--find-links", wheelhouse])
         if offline:
-            command.append("--no-deps")
+            if wheelhouse:
+                command.append("--no-index")
+            else:
+                command.append("--no-deps")
         command.append(str(wheel))
         results.append(run("install built wheel", command))
         if results[-1]["status"] == "FAIL":
@@ -90,7 +96,7 @@ def wheel_smoke(wheel: Path, scripts: list[str], *, offline: bool) -> list[dict[
 def main() -> int:
     parser = argparse.ArgumentParser(description="Local Sentinel Forge release gate")
     parser.add_argument("--quick", action="store_true", help="Skip audit, build, SBOM and wheel smoke")
-    parser.add_argument("--offline", action="store_true", help="Install the wheel with --no-deps")
+    parser.add_argument("--offline", action="store_true", help="Avoid package indexes during isolated wheel installation")
     args = parser.parse_args()
     if sys.version_info < (3, 11):
         raise SystemExit("Python 3.11 or newer is required")
@@ -132,7 +138,7 @@ def main() -> int:
 
     OUT.mkdir(parents=True, exist_ok=True)
     status = "PASS" if all(item["status"] == "PASS" for item in checks) else "FAIL"
-    report = {"schema": "sentinel-forge.local-release-gate.v2", "project": project, "version": version, "source": source_identity(), "python": sys.version, "platform": sys.platform, "status": status, "checks": checks, "artifacts": artifacts}
+    report = {"schema": "sentinel-forge.local-release-gate.v2", "project": project, "version": version, "source": source_identity(), "wheelhouse": os.environ.get("SENTINEL_FORGE_WHEELHOUSE"), "python": sys.version, "platform": sys.platform, "status": status, "checks": checks, "artifacts": artifacts}
     report_path = OUT / "release-gate.json"
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     for item in checks:
