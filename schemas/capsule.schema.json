@@ -1,18 +1,20 @@
 {
-  "$id": "https://reprosec.dev/schemas/rcap/0.2/capsule.schema.json",
-  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reprosec.dev/rcap/0.3/capsule.schema.json",
+  "title": "RCAP 0.3 Capsule Metadata",
+  "type": "object",
+  "required": ["format", "schema_version", "capsule_id", "title", "created_at", "created_by", "tool_version"],
   "properties": {
-    "capsule_id": {"title":"Capsule Id","type":"string"},
-    "created_at": {"title":"Created At","type":"string"},
-    "created_by": {"default":"reprosec","title":"Created By","type":"string"},
-    "deterministic_replay": {"default":false,"title":"Deterministic Replay","type":"boolean"},
-    "format": {"const":"RCAP","default":"RCAP","title":"Format","type":"string"},
-    "notes": {"default":"","title":"Notes","type":"string"},
-    "schema_version": {"default":"0.2","title":"Schema Version","type":"string"},
-    "title": {"title":"Title","type":"string"},
-    "tool_version": {"default":"0.3.0","title":"Tool Version","type":"string"}
+    "format": {"const": "RCAP"},
+    "schema_version": {"const": "0.3"},
+    "capsule_id": {"type": "string"},
+    "title": {"type": "string"},
+    "created_at": {"type": "string"},
+    "created_by": {"type": "string"},
+    "tool_version": {"type": "string"},
+    "workspace_id": {"type": ["string", "null"]},
+    "deterministic_replay": {"type": "boolean"},
+    "notes": {"type": "string"}
   },
-  "required":["title"],
-  "title":"CapsuleMetadata",
-  "type":"object"
+  "additionalProperties": false
 }

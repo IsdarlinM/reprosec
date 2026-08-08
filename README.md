@@ -2,75 +2,67 @@
 
 ```text
 REPROSEC CAPSULE
-imr :: v0.4.1
+imr :: v0.5.0
 ```
 
 ReproSec is the reference implementation of `.rcap`: an open, deterministic container for portable and reproducible security evidence.
 
 > **AI proposes. Evidence proves. Humans control.**
 
-ReproSec never treats an LLM inference or a single unstable response as a confirmed vulnerability. Observations, workflows, assertions, provenance, repeated controls and replay evidence remain traceable to verifiable data.
+## Standalone by design
+
+ReproSec is independently installable and independently useful. It depends on SRIC Core 0.5.x for common evidence/provenance/policy primitives, but AuthTwin, FossilScope, TrustBoundary Mapper and Exposure DNA are never required for capture, import, replay, validation, reporting, CLI, API or Web UI.
+
+```bash
+reprosec doctor
+reprosec capabilities
+```
+
+Compatible Sentinel Forge products add optional research capabilities through shared contracts and RCAP evidence; they are not runtime prerequisites.
 
 ## Implemented
 
-- RCAP 0.3 actors, sessions, secret references, network/validation records and compatibility material for RCAP 0.1/0.2.
-- Deterministic `.rcap` packing, SHA-256 manifests, Ed25519 signing and verification.
-- Safe extraction with traversal, symlink, entry-count, decompression-size and compression-ratio controls.
-- HAR, raw HTTP, constrained non-executing curl, Burp and ZAP imports.
-- Structured redaction for headers, cookies, URL queries, JSON and form bodies, with preview before persistence.
-- Explicit variables and ephemeral `--bind` values; unresolved values fail closed.
-- Header, cookie, regex and JSON-path extractors.
-- Extended assertions and privacy-preserving semantic JSON diff.
-- Text and binary response evidence with full observed-body hash, size, retained-body limits and truncation state.
-- Resolved IP, connected peer, HTTP version and TLS/ALPN network evidence where exposed by the transport.
-- DNS-pinned direct replay preserving hostname, SNI and certificate verification.
-- Environment proxies ignored by default; explicit proxy use requires acknowledgement.
-- Gate order: `Scope -> Policy -> Rate Limit -> Approval -> Executor`.
-- Redirects are opt-in and every destination is revalidated.
-- Timeline, evidence lineage and observed actor/operation matrix; unobserved cells remain `UNKNOWN`.
-- Authorized bounded HTTP capture, loopback proxy and browser-event recorder. CONNECT/TLS is metadata-only by default.
-- Local FastAPI API and responsive Web UI.
-- Offline synthetic demo requiring no API keys and making zero network requests.
-- SRIC 0.4.1 workspaces, graph, lineage, notebook and evidence primitives.
-- Multi-actor workflows, candidate workflow compiler, semantic differential v2 and public conformance fixtures.
+- RCAP 0.3 actors, sessions, secret references, network/validation records and compatibility material for RCAP 0.1/0.2;
+- deterministic `.rcap` packing, SHA-256 manifests, Ed25519 signing and verification;
+- safe extraction with traversal, symlink, entry-count, decompression-size and compression-ratio controls;
+- HAR, raw HTTP, constrained non-executing curl, Burp and ZAP imports;
+- structured redaction with preview before persistence;
+- explicit variables and ephemeral bindings; unresolved values fail closed;
+- response evidence with hashes, size, truncation state and retained-body limits;
+- DNS-pinned direct replay preserving hostname, SNI and certificate verification;
+- gate order `Scope -> Policy -> Rate Limit -> Approval -> Executor`;
+- redirects are opt-in and every destination is revalidated;
+- timeline, evidence lineage and observed actor/operation matrix;
+- authorized bounded HTTP capture, loopback proxy and browser-event recorder; CONNECT/TLS is metadata-only by default;
+- evidence-native research context linking scope snapshots, policy decisions, validation recipes, tool provenance and counter-evidence;
+- local FastAPI API, responsive Web UI and offline synthetic demo;
+- SRIC 0.5.x workspaces, graph, lineage, notebook and evidence primitives.
 
-## Replay stability in v0.4.1
+## Standalone install
 
-Repeated responses can vary because of timestamps, tracing, request IDs, caches, A/B tests, transient errors or eventual consistency. ReproSec now provides deterministic stability analysis that:
-
-- requires multiple samples;
-- normalizes only explicitly approved volatile fields;
-- computes canonical response fingerprints;
-- reports volatile retained headers and JSON paths;
-- calculates a flakiness score;
-- prevents unstable sample sets from supporting `VALIDATED` findings.
-
-See `docs/security/replay-stability.md`.
-
-## Development install
+Linux:
 
 ```bash
-python -m venv .venv
-. .venv/bin/activate  # Windows: .venv\Scripts\activate
-python -m pip install -e ../sric-core
-python -m pip install -e '.[dev]'
-python -m pytest
+./scripts/install-linux.sh
 reprosec doctor
+reprosec capabilities
 ```
 
-## Local release gate
+Windows:
 
-No hosted CI service is required:
-
-```bash
-python scripts/release-gate.py
+```cmd
+scripts\install-windows.cmd
+reprosec doctor
+reprosec capabilities
 ```
 
-The gate runs static checks, tests, security scan, dependency audit, SBOM generation, package build, isolated wheel installation and CLI help smoke tests. Evidence is written to `build/release-evidence/release-gate.json`.
+SRIC Core is resolved automatically. `SRIC_CORE_SOURCE` is an explicit development/release-validation override only; installers never silently consume sibling repositories.
 
 ## First five minutes
 
 ```bash
+reprosec doctor
+reprosec capabilities
 reprosec demo --output demo-capsule
 reprosec inspect demo-capsule
 reprosec timeline demo-capsule
@@ -87,9 +79,7 @@ reprosec report demo-capsule --output report.md --format md
 reprosec init case1 --title "Authorized test case"
 reprosec import har session.har --capsule case1
 reprosec import raw request.txt --capsule case1
-reprosec import curl "curl -H 'Authorization: Bearer ...' https://api.example.com/me" --capsule case1
 reprosec redact case1
-reprosec redact case1 --apply
 ```
 
 Imported commands and files are untrusted data and are never executed as instructions.
@@ -100,11 +90,28 @@ Imported commands and files are untrusted data and are never executed as instruc
 reprosec replay case1 REQ-... --allow '*.example.com' --allow-method GET
 ```
 
-An authorized mutating request additionally needs method scope and human approval:
+Authorized mutating requests additionally require method scope and human approval.
+
+## Web and API
+
+ReproSec serves its responsive local application and API through `reprosec web`. It is **not an operating-system web shell**.
+
+## Validation gates
 
 ```bash
-reprosec replay case1 REQ-... --allow 'api.example.com' --allow-method POST --approve-action
+python -m sric.standalone_gate --root .
+python scripts/release-gate.py
 ```
+
+Standalone and release evidence are written below `build/release-evidence/`. A release requires PASS tied to the exact commit/tree.
+
+## Uninstall
+
+```bash
+./scripts/uninstall-linux.sh
+```
+
+Runtime files are removed while capsules, configuration and other user data are preserved.
 
 ## Security and privacy defaults
 
@@ -116,8 +123,4 @@ reprosec replay case1 REQ-... --allow 'api.example.com' --allow-method POST --ap
 - Imported content: **untrusted data, never instructions**.
 - Required replay secrets: **ephemeral bindings or approved secret providers**.
 
-## Known limits
-
-Not yet claimed as complete: opt-in TLS interception with certificate lifecycle, full WebSocket/gRPC evidence capture, rich browser-state snapshots, complete Secret Vault replay bindings, long-running job orchestration for every operation, AI Reproduction Compiler, REP governance and authenticated non-loopback collaboration.
-
-Use ReproSec only on systems you own or are explicitly authorized to test.
+Use ReproSec only on systems you own or are explicitly authorized to test. Apache-2.0.

@@ -27,6 +27,12 @@ from .protocols import (
     WebSocketFrameRecord,
     WebSocketOpcode,
 )
+from .research_context import (
+    CapsuleResearchContext,
+    PolicyDecisionRecord,
+    ScopeSnapshot,
+    ToolProvenanceRecord,
+)
 from .stability import ReplayObservation, StabilityPolicy, StabilityReport, analyze_stability
 
 __all__ = [
@@ -34,6 +40,7 @@ __all__ = [
     "CapsuleArtifactChange",
     "CapsuleComparison",
     "CapsuleMinimizationPlan",
+    "CapsuleResearchContext",
     "CapsuleSnapshot",
     "ControlRole",
     "DifferentialDesignPolicy",
@@ -44,11 +51,14 @@ __all__ = [
     "GraphQLOperationRecord",
     "GrpcMessageRecord",
     "ManifestChange",
+    "PolicyDecisionRecord",
     "ProtocolEvidenceRecord",
     "ProtocolKind",
     "ReplayObservation",
+    "ScopeSnapshot",
     "StabilityPolicy",
     "StabilityReport",
+    "ToolProvenanceRecord",
     "WebSocketFrameRecord",
     "WebSocketOpcode",
     "analyze_stability",
@@ -56,4 +66,4 @@ __all__ = [
     "compare_capsules",
     "plan_minimization",
 ]
-__version__ = "0.4.1"
+__version__ = "0.5.0"
