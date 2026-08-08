@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .api import create_app as create_base_app
 from .capsule_analysis import CapsuleSnapshot, compare_capsules, plan_minimization
+from .research_context import CapsuleResearchContext
 
 
 class CapsuleComparisonRequest(BaseModel):
@@ -21,6 +22,7 @@ class CapsuleMinimizationRequest(BaseModel):
 
 
 router = APIRouter(prefix="/api/v1/capsule-analysis", tags=["capsule-analysis"])
+research_router = APIRouter(prefix="/api/v1/research-context", tags=["research-context"])
 
 
 @router.post("/compare")
@@ -44,7 +46,24 @@ async def minimize(request: CapsuleMinimizationRequest) -> dict[str, object]:
     return report.model_dump(mode="json")
 
 
+@research_router.post("/inspect")
+async def inspect_research_context(request: CapsuleResearchContext) -> dict[str, object]:
+    return {
+        "sentinel_case_id": request.sentinel_case_id,
+        "scope_snapshot_id": (
+            request.scope_snapshot.snapshot_id if request.scope_snapshot is not None else None
+        ),
+        "policy_decision_count": len(request.policy_decisions),
+        "validation_recipe_count": len(request.validation_recipes),
+        "tool_provenance_count": len(request.tool_provenance),
+        "counter_evidence_ids": request.counter_evidence_ids,
+        "context_sha256": request.sha256(),
+        "validated_finding_created": False,
+    }
+
+
 def create_app() -> FastAPI:
     app = create_base_app()
     app.include_router(router)
+    app.include_router(research_router)
     return app
