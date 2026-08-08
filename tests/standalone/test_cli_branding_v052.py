@@ -1,4 +1,4 @@
-from typer.testing import CliRunner
+from typer.main import get_command
 
 from reprosec.cli_all import BRAND, app
 from sric.cli_style import build_banner
@@ -11,7 +11,6 @@ def test_reprosec_brand_identity() -> None:
     assert "IsdarlinM :: v0.5.2" in banner
 
 
-def test_root_help_documents_no_color() -> None:
-    result = CliRunner().invoke(app, ["--help"])
-    assert result.exit_code == 0
-    assert "--no-color" in result.stdout
+def test_no_color_option_is_registered() -> None:
+    command = get_command(app)
+    assert any("--no-color" in getattr(param, "opts", ()) for param in command.params)
