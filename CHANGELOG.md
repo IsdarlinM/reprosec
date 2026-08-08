@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.5.2 - 2026-08-08
-- Added a subdued green interactive CLI banner with product description and `IsdarlinM :: v0.5.2` signature.
+- Added a subdued green interactive CLI banner ordered as `ReproSec Capsule :: v0.5.2`, `Developer: IsdarlinM`, then the product description.
 - Added colorized Typer/Rich command help plus global `--no-color` and `NO_COLOR` support.
 - Kept banner output on interactive stderr so JSON, exports and automation stdout remain clean.
 - Added CLI branding regression tests and documentation.

@@ -1,8 +1,10 @@
 # ReproSec Capsule
 
 ```text
-ReproSec Capsule
-IsdarlinM :: v0.5.2
+ReproSec Capsule :: v0.5.2
+Developer: IsdarlinM
+
+Capture, sanitize, replay, and package reproducible security evidence.
 ```
 
 ReproSec is the reference implementation of `.rcap`: an open, deterministic container for portable and reproducible security evidence.
@@ -61,7 +63,7 @@ SRIC Core is resolved automatically. `SRIC_CORE_SOURCE` is an explicit developme
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner with a short ReproSec description and `IsdarlinM :: v0.5.2`. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.2`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## First five minutes
 
