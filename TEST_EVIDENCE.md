@@ -2,31 +2,42 @@
 
 ## Release-candidate review — 2026-08-08
 
-The `agent/release-0.5.0` branch contains the ReproSec 0.5 changes under review:
+The `agent/release-0.5.0` branch contains:
 
-- SRIC 0.5 compatibility;
+- SRIC 0.5 compatibility and no mandatory sibling-product runtime dependencies;
 - evidence-native capsule research context for Sentinel Cases;
-- scope snapshots, policy decisions, validation recipes, tool provenance and counter-evidence references;
-- destructive-decision approval guards;
 - formal RCAP 0.3 specification and corrected current schema pointer;
-- 0.5 regression tests and standardized release-evidence gate v2.
+- `reprosec capabilities` and `/api/v1/capabilities`;
+- standalone CLI/API/Web tests;
+- recursive `--help`, `-h`, `COMMAND help` and invalid-option parser coverage for registered commands;
+- Linux/Windows clean-install smoke definitions using only ReproSec + SRIC;
+- Linux runtime uninstall that preserves capsules/configuration/user data;
+- Standalone Product Contract and standardized release-evidence gate v2.
 
 ## Fresh execution status
 
-**THE COMPLETE v0.5.0 RELEASE GATE HAS NOT BEEN EXECUTED SUCCESSFULLY FOR THIS BRANCH.**
+**THE COMPLETE v0.5.0 TEST/RELEASE GATES HAVE NOT EXECUTED SUCCESSFULLY FOR THIS BRANCH.**
 
-The private repository is accessible through the GitHub connector but cannot be mounted as a complete local checkout in this runtime. GitHub Actions currently terminates at `startup_failure` before test jobs start; the same infrastructure symptom is present in earlier ecosystem workflow runs, so it is not treated as test evidence.
+The repository cannot be mounted as a complete local checkout in the current runtime. The latest observed GitHub Actions run for the 0.5 branch concluded `startup_failure` and exposed zero jobs, so no pytest, installer, static-analysis or wheel result from that run is counted as evidence.
 
-## Required release evidence
+Tests being present in source is not a PASS result.
 
-Run the coordinated release train from sibling 0.5 checkouts:
+## Required exact-commit evidence
+
+From installed/local sibling 0.5 checkouts:
 
 ```bash
+python -m sric.standalone_gate --root reprosec
+python sric-core/scripts/release-standalone-ecosystem.py --root .
+python reprosec/scripts/release-gate.py
 python sric-core/scripts/release-ecosystem.py --root .
 ```
 
-The ecosystem gate supplies exact unreleased internal wheels through a local wheelhouse, then executes ReproSec's static checks, pytest, security/eval hooks, dependency audit, SBOM generation, build and isolated CLI wheel smoke.
+Required machine-readable results:
 
-Do not merge/tag ReproSec 0.5 until its exact-commit `release-gate.json` and the ecosystem `ecosystem-release-gate.json` both report `PASS`.
+- `reprosec/build/release-evidence/standalone-gate.json` = `PASS`;
+- `reprosec/build/release-evidence/release-gate.json` = `PASS`;
+- ecosystem standalone gate = `PASS`;
+- ecosystem release gate = `PASS`.
 
 Previous 0.4.x evidence remains a historical regression baseline only.
