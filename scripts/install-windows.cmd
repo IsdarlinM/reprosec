@@ -5,6 +5,7 @@ set "CMD=reprosec"
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..") do set "REPO_ROOT=%%~fI"
 set "CONSTRAINTS=%REPO_ROOT%\requirements\runtime-py311.lock"
+set "FIRST_PARTY=%REPO_ROOT%\requirements\first-party.txt"
 set "INSTALL_ROOT=%LOCALAPPDATA%\ReproSec"
 set "VENV=%INSTALL_ROOT%\venv"
 set "BIN_DIR=%USERPROFILE%\.local\bin"
@@ -19,8 +20,11 @@ if not exist "%VENV%\Scripts\python.exe" %PY_CMD% -m venv "%VENV%" || exit /b 1
 if defined SRIC_CORE_SOURCE (
   if not exist "%SRIC_CORE_SOURCE%\pyproject.toml" (echo SRIC_CORE_SOURCE is invalid.& exit /b 3)
   "%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%SRIC_CORE_SOURCE%" || exit /b 3
+) else (
+  if not exist "%FIRST_PARTY%" (echo Missing first-party dependency manifest: %FIRST_PARTY%& exit /b 3)
+  "%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" -r "%FIRST_PARTY%" || (echo Failed to install Sentinel Forge first-party dependencies.& exit /b 3)
 )
-"%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%REPO_ROOT%" || (echo Installation failed. ReproSec requires sric-core 0.5.x and resolves it automatically.& exit /b 3)
+"%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%REPO_ROOT%" || (echo Installation failed after dependency bootstrap.& exit /b 3)
 >"%BIN_DIR%\%CMD%.cmd" echo @"%VENV%\Scripts\%CMD%.exe" %%*
 for /f "tokens=2,*" %%A in ('reg query HKCU\Environment /v Path 2^>nul ^| findstr /I "Path"') do set "USER_PATH=%%B"
 echo ;%USER_PATH%; | find /I ";%BIN_DIR%;" >nul
