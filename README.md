@@ -1,8 +1,8 @@
 # ReproSec Capsule
 
 ```text
-REPROSEC CAPSULE
-imr :: v0.5.0
+ReproSec Capsule
+IsdarlinM :: v0.5.2
 ```
 
 ReproSec is the reference implementation of `.rcap`: an open, deterministic container for portable and reproducible security evidence.
@@ -36,7 +36,8 @@ Compatible Sentinel Forge products add optional research capabilities through sh
 - authorized bounded HTTP capture, loopback proxy and browser-event recorder; CONNECT/TLS is metadata-only by default;
 - evidence-native research context linking scope snapshots, policy decisions, validation recipes, tool provenance and counter-evidence;
 - local FastAPI API, responsive Web UI and offline synthetic demo;
-- SRIC 0.5.x workspaces, graph, lineage, notebook and evidence primitives.
+- SRIC 0.5.x workspaces, graph, lineage, notebook and evidence primitives;
+- professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Standalone install
 
@@ -57,6 +58,10 @@ reprosec capabilities
 ```
 
 SRIC Core is resolved automatically. `SRIC_CORE_SOURCE` is an explicit development/release-validation override only; installers never silently consume sibling repositories.
+
+## CLI presentation
+
+Interactive terminals display a compact subdued-green banner with a short ReproSec description and `IsdarlinM :: v0.5.2`. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## First five minutes
 
