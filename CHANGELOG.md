@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 - 2026-08-08
+- Added evidence-native RCAP research context linking capsules to Sentinel Cases without changing RCAP 0.3 compatibility.
+- Added immutable scope snapshots, policy-decision records, validation recipes, tool provenance and counter-evidence references.
+- Added safety validation for destructive policy decisions and cross-reference integrity between recipes and policy decisions.
+- Added deterministic SHA-256 research-context fingerprints for evidence packaging and comparison.
+- Published the missing RCAP 0.3 specification and aligned the current schema pointer with the runtime RCAP 0.3 contract.
+- Updated runtime metadata and the SRIC dependency contract for the Sentinel Forge 0.5 release train.
+- Added 0.5 regression tests for research-context integrity and safety gates.
+
 ## 0.4.1 - 2026-08-06
 - Added deterministic replay stability analysis across repeated observations.
 - Added explicit normalization policies for volatile headers, JSON paths and regex-defined dynamic values.
