@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reprosec"
-version = "0.5.1"
+version = "0.5.2"
 description = "Reference implementation for Reproducible Security Capsules (.rcap)."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 authors = [{name = "imr"}]
 dependencies = [
-  "sric-core>=0.5.1,<0.6",
+  "sric-core>=0.5.2,<0.6",
   "fastapi>=0.128,<1",
   "pydantic>=2.10,<3",
   "typer>=0.15,<1",
