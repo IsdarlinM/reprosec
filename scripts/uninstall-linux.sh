@@ -1,4 +1,7 @@
 #!/usr/bin/env sh
 set -eu
-rm -f "${HOME}/.local/bin/reprosec"; rm -rf "${HOME}/.local/share/reprosec"
-echo "ReproSec runtime removed. User-created capsules were not deleted."
+INSTALL_ROOT="${HOME}/.local/share/reprosec"
+BIN="${HOME}/.local/bin/reprosec"
+rm -f "$BIN"
+rm -rf "$INSTALL_ROOT/venv"
+echo "Removed ReproSec runtime. Capsules, configuration and other user data under $INSTALL_ROOT were preserved."
