@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1 - 2026-08-08
+- Fixed clean installation when `sric-core` is not published on PyPI.
+- Added a first-party dependency manifest pinned to the exact SRIC Core 0.5.1 GitHub commit.
+- Windows and Linux installers now bootstrap Sentinel Forge first-party dependencies before installing ReproSec and its third-party runtime closure.
+- Preserved `SRIC_CORE_SOURCE` as an explicit development/release-validation override.
+- Updated the runtime lock and package dependency floor to SRIC Core 0.5.1.
+- Added standalone regression coverage for the installer dependency contract.
+
 ## 0.5.0 - 2026-08-08
 - Added evidence-native RCAP research context linking capsules to Sentinel Cases without changing RCAP 0.3 compatibility.
 - Added immutable scope snapshots, policy-decision records, validation recipes, tool provenance and counter-evidence references.
