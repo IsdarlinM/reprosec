@@ -6,9 +6,11 @@ from sric.cli_style import build_banner
 
 def test_reprosec_brand_identity() -> None:
     banner = build_banner(BRAND)
-    assert "ReproSec Capsule" in banner
-    assert "Capture, sanitize, replay" in banner
-    assert "IsdarlinM :: v0.5.2" in banner
+    product = banner.index("ReproSec Capsule :: v0.5.2")
+    developer = banner.index("Developer: IsdarlinM")
+    description = banner.index("Capture, sanitize, replay")
+    assert product < developer < description
+    assert "IsdarlinM ::" not in banner
 
 
 def test_no_color_option_is_registered() -> None:
