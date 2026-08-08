@@ -1,40 +1,32 @@
-# Test Evidence — ReproSec v0.4.1
+# Test Evidence — ReproSec v0.5.0 Release Candidate
 
-## QA pass — 2026-08-07
+## Release-candidate review — 2026-08-08
 
-Freshly executed in the current local runtime:
+The `agent/release-0.5.0` branch contains the ReproSec 0.5 changes under review:
 
-- Sentinel Forge cross-product high-risk regression matrix including ReproSec capsule minimization, replay stability and passive protocol records: **7/7 matrix tests passed**;
-- Python `compileall` over the reconstructed corrected modules: **PASS**;
-- branch comparison against `main`: branch is ahead and **0 commits behind** at the time of this audit.
+- SRIC 0.5 compatibility;
+- evidence-native capsule research context for Sentinel Cases;
+- scope snapshots, policy decisions, validation recipes, tool provenance and counter-evidence references;
+- destructive-decision approval guards;
+- formal RCAP 0.3 specification and corrected current schema pointer;
+- 0.5 regression tests and standardized release-evidence gate v2.
 
-Current-source review and regression tests added in this pass cover:
+## Fresh execution status
 
-- explicit minimization roots and transitive retention;
-- case-insensitive HTTP `Content-Type` handling;
-- invalid regex rejection;
-- protocol subtype discriminators and WebSocket CLOSE metadata;
-- stability/protocol/minimization API errors returning controlled 422 responses;
-- `capsule-analysis` being registered in the installed CLI;
-- precision/protocol/capsule CLI validation returning controlled exit codes instead of tracebacks;
-- recursive `--help`, `-h` and trailing `COMMAND help` coverage through the final entrypoint;
-- `reprosec web` serving the vNext API, including capsule-analysis routes;
-- public Python exports for capsule comparison/minimization.
+**THE COMPLETE v0.5.0 RELEASE GATE HAS NOT BEEN EXECUTED SUCCESSFULLY FOR THIS BRANCH.**
 
-## Current release-gate status
+The private repository is accessible through the GitHub connector but cannot be mounted as a complete local checkout in this runtime. GitHub Actions currently terminates at `startup_failure` before test jobs start; the same infrastructure symptom is present in earlier ecosystem workflow runs, so it is not treated as test evidence.
 
-**FULL CURRENT REPOSITORY GATE NOT EXECUTABLE IN THIS RUNTIME.**
+## Required release evidence
 
-The repository is private and this runtime cannot materialize a complete checkout from GitHub; individual authenticated blobs are available only through the connector. Ruff, mypy, `build` and `pip-audit` are unavailable and cannot be installed from the environment package index. No GitHub Actions, Codespaces or paid/hosted GitHub execution was used.
-
-The complete exact-commit gate must still be run from a sibling local checkout before treating v0.4.1 as a fully validated release:
+Run the coordinated release train from sibling 0.5 checkouts:
 
 ```bash
-python -m pip install -e ../sric-core
-python -m pip install -e '.[dev]'
-python scripts/release-gate.py
+python sric-core/scripts/release-ecosystem.py --root .
 ```
 
-## Previous validated baseline
+The ecosystem gate supplies exact unreleased internal wheels through a local wheelhouse, then executes ReproSec's static checks, pytest, security/eval hooks, dependency audit, SBOM generation, build and isolated CLI wheel smoke.
 
-The previous v0.4.0 state was recorded on 2026-07-22 with **68 pytest tests passed**, compileall/security scan/CLI help/synthetic smoke/build/isolated wheel smoke all PASS. Those results are a regression baseline only and do not prove v0.4.1.
+Do not merge/tag ReproSec 0.5 until its exact-commit `release-gate.json` and the ecosystem `ecosystem-release-gate.json` both report `PASS`.
+
+Previous 0.4.x evidence remains a historical regression baseline only.
