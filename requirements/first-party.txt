@@ -1,0 +1,2 @@
+# Sentinel Forge first-party runtime dependencies.
+sric-core @ https://github.com/IsdarlinM/sric-core/archive/61bbfcf80da70409231324b98debd205f1c5014f.zip
