@@ -1,7 +1,7 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SRIC_SHA = "8dfb1fad1fdba30952bb58de3c0cfe4e8443e416"
+SRIC_SHA = "a8f48bda464be66391c8d76a9d4700a2a02dcdae"
 
 
 def test_first_party_manifest_pins_exact_sric_commit() -> None:
