@@ -19,17 +19,21 @@ if not exist "%VENV%\Scripts\python.exe" %PY_CMD% -m venv "%VENV%" || exit /b 1
 "%VENV%\Scripts\python.exe" -m pip install --upgrade pip || exit /b 1
 if defined SRIC_CORE_SOURCE (
   if not exist "%SRIC_CORE_SOURCE%\pyproject.toml" (echo SRIC_CORE_SOURCE is invalid.& exit /b 3)
-  "%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%SRIC_CORE_SOURCE%" || exit /b 3
+  "%VENV%\Scripts\python.exe" -m pip install --upgrade --force-reinstall -c "%CONSTRAINTS%" "%SRIC_CORE_SOURCE%" || (echo Failed to repair SRIC Core.& exit /b 3)
 ) else (
   if not exist "%FIRST_PARTY%" (echo Missing first-party dependency manifest: %FIRST_PARTY%& exit /b 3)
-  "%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" -r "%FIRST_PARTY%" || (echo Failed to install Sentinel Forge first-party dependencies.& exit /b 3)
+  "%VENV%\Scripts\python.exe" -m pip install --upgrade --force-reinstall -c "%CONSTRAINTS%" -r "%FIRST_PARTY%" || (echo Failed to repair Sentinel Forge first-party dependencies.& exit /b 3)
 )
-"%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%REPO_ROOT%" || (echo Installation failed after dependency bootstrap.& exit /b 3)
+"%VENV%\Scripts\python.exe" -m pip install --upgrade --force-reinstall -c "%CONSTRAINTS%" "%REPO_ROOT%" || (echo Installation failed after dependency bootstrap.& exit /b 3)
+"%VENV%\Scripts\python.exe" -m pip check || (echo Installed dependency graph is inconsistent.& exit /b 3)
+"%VENV%\Scripts\python.exe" -c "import importlib.metadata as m; import sric.web_console, sric.web_workbench; v=tuple(int(x) for x in m.version('sric-core').split('.')[:3]); raise SystemExit(0 if (0,5,7) <= v < (0,6,0) else 1)" || (echo SRIC Core runtime integrity check failed. Required ^>=0.5.7,^<0.6.& exit /b 3)
 >"%BIN_DIR%\%CMD%.cmd" echo @"%VENV%\Scripts\%CMD%.exe" %%*
 for /f "tokens=2,*" %%A in ('reg query HKCU\Environment /v Path 2^>nul ^| findstr /I "Path"') do set "USER_PATH=%%B"
 echo ;%USER_PATH%; | find /I ";%BIN_DIR%;" >nul
 if errorlevel 1 (if defined USER_PATH (setx PATH "%USER_PATH%;%BIN_DIR%" >nul) else (setx PATH "%BIN_DIR%" >nul))
 "%VENV%\Scripts\%CMD%.exe" doctor || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" capabilities || exit /b 1
-echo %PROJECT% installed successfully in standalone mode.
+"%VENV%\Scripts\%CMD%.exe" --help >nul || exit /b 1
+"%VENV%\Scripts\%CMD%.exe" -h >nul || exit /b 1
+echo %PROJECT% installed/repaired successfully in standalone mode.
 exit /b 0
