@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.5 - 2026-08-08
+- Made the official ReproSec updater zero-config: `reprosec update`, `reprosec update --check`, and `reprosec update --force` no longer require user-supplied manifest/key configuration.
+- Delegated official update trust and immutable GitHub signed-commit validation to SRIC Core 0.5.5 while preserving same-version force reinstall and downgrade rejection.
+- Kept `--manifest` plus `--public-key` as an explicit advanced custom/private-channel override.
+- Updated the SRIC Core runtime floor, lock, and exact first-party pin to the signed SRIC 0.5.5 release commit.
+- Added standalone regression coverage proving `reprosec update --force` selects the official channel with no manifest/key.
+
 ## 0.5.4 - 2026-08-08
 - Added the SRIC Web Command Console at `/console`, exposing the complete installed `reprosec.cli_all` command tree without an operating-system shell.
 - Added exact Web-catalog-to-CLI-tree regression coverage so future public CLI commands cannot silently disappear from the Web console.
@@ -72,7 +79,7 @@
 - Added structured query/JSON/form secret redaction and audit-target query redaction.
 - Added conservative HTTP action classification; DELETE is destructive by default and GET/HEAD may be sensitive or mutating.
 - Added streaming response size/retention limits, binary evidence handling and fail-closed unresolved variables.
-- Redirect following is opt-in and each hop is revalidated.
+- Redirect following is opt-in and each destination is revalidated.
 - Added operational replay error codes and safe CLI error rendering.
 
 ### Evidence and reproduction
