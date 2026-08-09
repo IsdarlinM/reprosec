@@ -6,13 +6,20 @@ from sric.cli_style import CLIBrand, configure_cli_context, no_color_option, run
 from . import __version__
 from . import cli_commands_runtime as _runtime
 from . import cli_research_context as _research_context  # noqa: F401
-from .api_all import create_app as create_complete_app
 from .cli import normalize_help_argv
 from .cli_vnext import app
 from . import cli_capabilities as _cli_capabilities  # noqa: F401
 from . import cli_update as _cli_update  # noqa: F401,E402
 
-_runtime.create_app = create_complete_app
+
+def _create_complete_app(*args: object, **kwargs: object) -> object:
+    """Load optional/shared Web modules only when the Web command is invoked."""
+    from .api_all import create_app
+
+    return create_app(*args, **kwargs)
+
+
+_runtime.create_app = _create_complete_app
 
 __all__ = ["BRAND", "app", "run"]
 
