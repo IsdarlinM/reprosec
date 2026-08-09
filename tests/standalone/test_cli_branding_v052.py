@@ -6,7 +6,7 @@ from sric.cli_style import build_banner
 
 def test_reprosec_brand_identity() -> None:
     banner = build_banner(BRAND)
-    product = banner.index("ReproSec Capsule :: v0.5.2")
+    product = banner.index("ReproSec Capsule :: v0.5.3")
     developer = banner.index("Developer: IsdarlinM")
     description = banner.index("Capture, sanitize, replay")
     assert product < developer < description

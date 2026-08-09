@@ -29,7 +29,7 @@ Pygments==2.20.0
 rich==15.0.0
 shellingham==1.5.4
 SQLAlchemy==2.0.50
-sric-core==0.5.2
+sric-core==0.5.3
 starlette==0.50.0
 typer==0.26.3
 typing-inspection==0.4.2
