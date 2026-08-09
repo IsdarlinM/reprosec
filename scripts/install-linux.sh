@@ -38,10 +38,13 @@ case ":${PATH:-}:" in
   *":$BIN_DIR:"*) ;;
   *) PROFILE="${HOME}/.profile"; PATH_LINE='export PATH="$HOME/.local/bin:$PATH"'; touch "$PROFILE"; grep -F "$PATH_LINE" "$PROFILE" >/dev/null 2>&1 || printf '\n# Sentinel Forge tools\n%s\n' "$PATH_LINE" >> "$PROFILE" ;;
 esac
+
+# Render the product banner once with the user-facing doctor check. Internal
+# capability/help smoke tests suppress it to keep installation output compact.
 "$VENV/bin/$CMD" doctor
-"$VENV/bin/$CMD" capabilities
-"$VENV/bin/$CMD" --help >/dev/null
-"$VENV/bin/$CMD" -h >/dev/null
-"$VENV/bin/$CMD" help >/dev/null
+SENTINEL_BANNER=off "$VENV/bin/$CMD" capabilities
+SENTINEL_BANNER=off "$VENV/bin/$CMD" --help >/dev/null
+SENTINEL_BANNER=off "$VENV/bin/$CMD" -h >/dev/null
+SENTINEL_BANNER=off "$VENV/bin/$CMD" help >/dev/null
 printf '%s installed/repaired successfully in standalone mode.\n' "$PROJECT"
 printf 'Command: %s\n' "$CMD"
