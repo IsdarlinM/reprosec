@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.7 - 2026-08-09
+- Fixed the release/runtime split that could install a new ReproSec beside an older SRIC Core and fail on shared Web-module imports.
+- Added exact first-party version/module compatibility diagnostics and lazy shared-Web imports; a missing Workbench now produces an actionable 503 instead of crashing the entire CLI.
+- Official product updates repair supported stale/corrupt SRIC 0.5.x runtimes using immutable GitHub-signature-verified historical snapshots and the official channel before updating ReproSec.
+- Linux and Windows installers now force-reinstall the pinned signed SRIC runtime and ReproSec, run `pip check`, import-probe Web Console/Workbench, and execute doctor/capability/help smokes.
+- Added regression coverage for the reported stale-runtime failure class, signed transition chain, same-version core repair, degraded Web behavior, every public CLI help form, and exact ordered CLI/Web parameter parity.
+- New installs pin signed SRIC Core 0.5.8 while ReproSec remains compatible with the 0.5.7+ shared runtime contract.
+
 ## 0.5.6 - 2026-08-09
 - Added the full Web Feature Workbench at `/workbench`, generated from `reprosec.cli_all`, so every public CLI command and argument has a structured responsive Web control.
 - Added native-dashboard navigation to **All Features** and **Advanced Console** while retaining the existing evidence-focused dashboard.
