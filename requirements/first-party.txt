@@ -1,3 +1,3 @@
 # Sentinel Forge first-party runtime dependencies.
 # Pinned to an exact public GitHub commit so installation does not depend on PyPI publication.
-sric-core @ https://github.com/IsdarlinM/sric-core/archive/6217b4e0b8b1a7b69f2f64181d1e3b22fd4bc221.zip
+sric-core @ https://github.com/IsdarlinM/sric-core/archive/8858854e22a6d1154e676c4cb6684b87d610d36f.zip
