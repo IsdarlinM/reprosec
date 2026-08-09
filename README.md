@@ -1,7 +1,7 @@
 # ReproSec Capsule
 
 ```text
-ReproSec Capsule :: v0.5.3
+ReproSec Capsule :: v0.5.4
 Developer: IsdarlinM
 
 Capture, sanitize, replay, and package reproducible security evidence.
@@ -40,6 +40,7 @@ Compatible Sentinel Forge products add optional research capabilities through sh
 - local FastAPI API, responsive Web UI and offline synthetic demo;
 - SRIC 0.5.x workspaces, graph, lineage, notebook and evidence primitives;
 - signed update flow with safe same-version `update --force` reinstall support;
+- Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Standalone install
@@ -64,7 +65,7 @@ SRIC Core is resolved automatically. `SRIC_CORE_SOURCE` is an explicit developme
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.3`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.4`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## First five minutes
 
@@ -102,7 +103,9 @@ Authorized mutating requests additionally require method scope and human approva
 
 ## Web and API
 
-ReproSec serves its responsive local application and API through `reprosec web`. It is **not an operating-system web shell**.
+ReproSec serves its responsive local application and API through `reprosec web`. The existing research dashboard remains available, and `/console` provides the Web Command Console. Its catalog is generated from `reprosec.cli_all`, and a standalone test requires the Web and CLI command-path sets to be exactly equal.
+
+The command console is **not an operating-system web shell**: it invokes only the fixed SRIC runner with `shell=False`, disabled stdin and a structured argv array. Mutating commands require explicit approval; ReproSec's own Scope, Policy, rate-limit, target-validation and approval gates remain authoritative. See `docs/web/cli-parity.md`.
 
 ## Signed updates
 
