@@ -1,7 +1,7 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SRIC_SHA = "8858854e22a6d1154e676c4cb6684b87d610d36f"
+SRIC_SHA = "331bb3faaef18deed842fdc120c6debcf60294b4"
 
 
 def test_first_party_manifest_pins_exact_sric_commit() -> None:
@@ -9,13 +9,18 @@ def test_first_party_manifest_pins_exact_sric_commit() -> None:
     assert f"sric-core @ https://github.com/IsdarlinM/sric-core/archive/{SRIC_SHA}.zip" in text
 
 
-def test_installers_bootstrap_first_party_dependencies() -> None:
+def test_installers_bootstrap_and_repair_first_party_dependencies() -> None:
     windows = (ROOT / "scripts" / "install-windows.cmd").read_text(encoding="utf-8")
     linux = (ROOT / "scripts" / "install-linux.sh").read_text(encoding="utf-8")
+    for text in (windows, linux):
+        assert "--force-reinstall" in text
+        assert "pip check" in text
+        assert "sric.web_console" in text
+        assert "sric.web_workbench" in text
     assert '-r "%FIRST_PARTY%"' in windows
     assert '-r "$FIRST_PARTY"' in linux
 
 
 def test_runtime_lock_matches_sric_patch() -> None:
     text = (ROOT / "requirements" / "runtime-py311.lock").read_text(encoding="utf-8")
-    assert "sric-core==0.5.6" in text
+    assert "sric-core==0.5.7" in text
