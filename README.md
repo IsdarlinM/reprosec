@@ -1,7 +1,7 @@
 # ReproSec Capsule
 
 ```text
-ReproSec Capsule :: v0.5.8
+ReproSec Capsule :: v0.5.9
 Developer: IsdarlinM
 
 Capture, sanitize, replay, and package reproducible security evidence.
@@ -66,11 +66,13 @@ reprosec capabilities
 
 The normal installer pins SRIC Core to an immutable GitHub commit and resolves that explicit first-party source **in the same pip transaction as ReproSec**. `sric-core` is intentionally not discovered from PyPI, so the installer never performs a separate product-only `--force-reinstall` that could trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override only.
 
-The repair path preserves capsules, configuration and workspaces. It bootstraps `pip`, `setuptools` and `wheel`, force-reinstalls constrained ReproSec plus the explicit SRIC source, runs `pip check`, verifies `sric.web_console` and `sric.web_workbench`, and only then runs doctor/capability plus `--help`, `-h` and `help` smokes. Linux persists a valid `$HOME/.local/bin` PATH entry without literal quote characters; Windows accepts any Python 3 installation that actually satisfies `>=3.11`.
+The repair path preserves capsules, configuration and workspaces. It validates both the host Python and the existing runtime interpreter; a stale, incomplete or broken environment rebuilds only the isolated ReproSec `venv`. It bootstraps `pip`, `setuptools` and `wheel`, force-reinstalls constrained ReproSec plus the explicit SRIC source, runs `pip check`, verifies `sric.web_console` and `sric.web_workbench`, and only then runs doctor/capability plus `--help`, `-h` and `help` smokes.
+
+On Termux, a writable `$PREFIX/bin` already present in `PATH` is preferred so `reprosec` is immediately reachable. Standard Linux falls back to `~/.local/bin` and persists the canonical profile entry only when necessary. Windows uses SRIC's registry-backed `sric.install_path` helper instead of `setx`, preserving the existing user PATH value type and broadcasting the environment change; any Python 3 interpreter satisfying `>=3.11` is accepted.
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.8`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean.
+Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.9`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean.
 
 The help contract covers `reprosec --help`, `reprosec -h`, `reprosec help`, `reprosec COMMAND --help`, `reprosec COMMAND -h` and `reprosec COMMAND help`.
 
@@ -141,7 +143,7 @@ python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.8 installer regression verifies the unpublished-first-party resolver topology, immutable SRIC pin, runtime lock, Linux PATH quoting, Windows Python discovery and dependency/import/help smokes. Existing interface/runtime and unit/integration/E2E/security/fuzz suites remain authoritative for RCAP, import, replay, scope, DNS pinning, redaction, assertions, reporting and other business features. Destructive operations are gate-tested rather than executed solely for coverage.
+The 0.5.9 installer regression verifies the unpublished-first-party resolver topology, immutable SRIC pin, runtime lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, Python discovery and dependency/import/help smokes. Existing interface/runtime and unit/integration/E2E/security/fuzz suites remain authoritative for RCAP, import, replay, scope, DNS pinning, redaction, assertions, reporting and other business features. Destructive operations are gate-tested rather than executed solely for coverage.
 
 Standalone and release evidence are written below `build/release-evidence/`. A release requires PASS tied to the exact commit/tree.
 

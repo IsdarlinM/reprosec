@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.9 - 2026-08-09
+- Hardened repair installation so obsolete, incomplete or broken Python environments rebuild only the isolated ReproSec venv while preserving capsules, configuration and workspaces.
+- Termux now prefers a writable `$PREFIX/bin` already present in `PATH`, making `reprosec` immediately reachable after installation.
+- Windows PATH updates now use SRIC Core's registry-backed `sric.install_path` helper instead of `setx`, avoiding user-PATH truncation/rewrite hazards.
+- Preserved the atomic ReproSec + explicit first-party SRIC resolver fix and updated the immutable SRIC pin/runtime lock to SRIC Core 0.5.10.
+- Expanded installer regressions for venv-only repair, Termux path selection, safe Windows PATH handling, Python discovery, dependency integrity and help smokes.
+
 ## 0.5.8 - 2026-08-09
 - Fixed clean/repair installation `ResolutionImpossible` when ReproSec depends on the first-party `sric-core` package distributed from an immutable GitHub snapshot rather than PyPI.
 - Linux/Termux and Windows now resolve ReproSec plus the explicit SRIC source in one pip transaction; the installer no longer performs a product-only `--force-reinstall` that can make pip search the public index for `sric-core`.
