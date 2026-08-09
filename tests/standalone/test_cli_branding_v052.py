@@ -1,12 +1,13 @@
 from typer.main import get_command
 
+from reprosec import __version__
 from reprosec.cli_all import BRAND, app
 from sric.cli_style import build_banner
 
 
 def test_reprosec_brand_identity() -> None:
     banner = build_banner(BRAND)
-    product = banner.index("ReproSec Capsule :: v0.5.3")
+    product = banner.index(f"ReproSec Capsule :: v{__version__}")
     developer = banner.index("Developer: IsdarlinM")
     description = banner.index("Capture, sanitize, replay")
     assert product < developer < description
