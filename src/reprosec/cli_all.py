@@ -10,6 +10,7 @@ from .api_all import create_app as create_complete_app
 from .cli import normalize_help_argv
 from .cli_vnext import app
 from . import cli_capabilities as _cli_capabilities  # noqa: F401
+from . import cli_update as _cli_update  # noqa: F401,E402
 
 _runtime.create_app = create_complete_app
 
