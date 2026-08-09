@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.6 - 2026-08-09
+- Added the full Web Feature Workbench at `/workbench`, generated from `reprosec.cli_all`, so every public CLI command and argument has a structured responsive Web control.
+- Added native-dashboard navigation to **All Features** and **Advanced Console** while retaining the existing evidence-focused dashboard.
+- Reused the SRIC fixed runner, `shell=False`, CSRF protection, secret redaction, bounded/cancellable jobs and mutation/destructive approval gates; ReproSec Scope/Policy/rate/target controls remain authoritative.
+- Updated the SRIC Core floor, runtime lock and exact first-party pin to the signed SRIC 0.5.6 Workbench release.
+- Added exhaustive standalone tests that invoke help for every public command, verify all options/required arguments and compare the complete ordered CLI parameter tree with the Workbench catalog.
+
 ## 0.5.5 - 2026-08-08
 - Made the official ReproSec updater zero-config: `reprosec update`, `reprosec update --check`, and `reprosec update --force` no longer require user-supplied manifest/key configuration.
 - Delegated official update trust and immutable GitHub signed-commit validation to SRIC Core 0.5.5 while preserving same-version force reinstall and downgrade rejection.
