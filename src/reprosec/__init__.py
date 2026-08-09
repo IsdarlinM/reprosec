@@ -66,4 +66,4 @@ __all__ = [
     "compare_capsules",
     "plan_minimization",
 ]
-__version__ = "0.5.5"
+__version__ = "0.5.6"
