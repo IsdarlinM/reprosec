@@ -5,7 +5,8 @@
 - Termux now prefers a writable `$PREFIX/bin` already present in `PATH`, making `reprosec` immediately reachable after installation.
 - Windows PATH updates now use SRIC Core's registry-backed `sric.install_path` helper instead of `setx`, avoiding user-PATH truncation/rewrite hazards.
 - Preserved the atomic ReproSec + explicit first-party SRIC resolver fix and updated the immutable SRIC pin/runtime lock to SRIC Core 0.5.10.
-- Expanded installer regressions for venv-only repair, Termux path selection, safe Windows PATH handling, Python discovery, dependency integrity and help smokes.
+- Installer validation now renders the ReproSec banner at most once: `doctor` remains user-visible while internal capability/help smokes run with `SENTINEL_BANNER=off`.
+- Expanded installer regressions for venv-only repair, Termux path selection, safe Windows PATH handling, Python discovery, dependency integrity, help smokes and single-banner output.
 
 ## 0.5.8 - 2026-08-09
 - Fixed clean/repair installation `ResolutionImpossible` when ReproSec depends on the first-party `sric-core` package distributed from an immutable GitHub snapshot rather than PyPI.
@@ -48,7 +49,7 @@
 ## 0.5.3 - 2026-08-08
 - Added `reprosec update --force` for explicit same-version reinstall of a trusted signed release using pip `--force-reinstall`.
 - Preserved signed-manifest and SHA-256 wheel verification, state backup and rollback behavior.
-- `--force` may install the same or a newer signed release, never an older release; SemVer prerelease precedence is enforced by SRIC Core.
+- `--force` may install the same or a newer signed version, never an older version; SemVer prerelease precedence is enforced by SRIC Core.
 - `--check` and `--force` are mutually exclusive.
 - Updated the SRIC Core runtime floor, lock and exact first-party source pin to 0.5.3.
 - Added standalone regression coverage for the public `--force` CLI contract.
