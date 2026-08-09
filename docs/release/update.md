@@ -1,6 +1,6 @@
-# Signed updates
+# Updates
 
-Configure `REPROSEC_RELEASE_MANIFEST_URL` and `REPROSEC_RELEASE_PUBLIC_KEY`, or pass `--manifest` and `--public-key` explicitly.
+The official ReproSec update channel is zero-config:
 
 ```bash
 reprosec update --check
@@ -8,8 +8,14 @@ reprosec update
 reprosec update --force
 ```
 
-`reprosec update --check` verifies the signed release metadata and reports availability without installing. `reprosec update` installs a newer trusted release when one is selected by the manifest. `reprosec update --force` explicitly reinstalls the selected signed release even when that exact version is already installed; the updater invokes pip with `--force-reinstall` after signature and SHA-256 verification.
+Normal users do **not** provide a manifest or public key. SRIC resolves the fixed official `IsdarlinM/reprosec` channel, requires an immutable GitHub signature-verified release commit, validates the downloaded source ZIP and its `pyproject.toml`, backs up state, installs without a shell, and verifies the installed distribution version.
 
-`--force` never permits a downgrade, including a prerelease replacing a stable release with the same numeric core version. `--check` and `--force` are mutually exclusive. State is backed up before installation, normal upgrades require verified rollback metadata, and same-version forced reinstalls use the verified target wheel as the package recovery artifact.
+`reprosec update --check` verifies the official release metadata without installing. `reprosec update` installs a newer official release. `reprosec update --force` reinstalls the official release even when that exact version is already installed and uses pip `--force-reinstall` for that explicit force operation.
 
-Only Ed25519-signed manifests and hash-matching wheel artifacts are accepted. HTTP update sources, unsigned downloads, and blind `git pull` updates are rejected. Until the official release signing channel and public trust root are published, the manifest and trusted public key must be configured explicitly.
+`--force` never permits a downgrade. `--check` and `--force` are mutually exclusive. Normal upgrades require rollback metadata matching the currently installed version; same-version force reinstalls use the verified target snapshot as the recovery package.
+
+## Advanced custom channel
+
+`--manifest` and `--public-key` remain available together for private/custom channels. The corresponding `REPROSEC_RELEASE_MANIFEST_URL` and `REPROSEC_RELEASE_PUBLIC_KEY` environment variables are also treated as an explicit custom-channel override. Supplying only one side is rejected.
+
+Custom channels retain Ed25519 manifest verification and SHA-256 wheel verification. HTTP update sources and blind `git pull` remain prohibited.
