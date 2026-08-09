@@ -1,7 +1,7 @@
 # ReproSec Capsule
 
 ```text
-ReproSec Capsule :: v0.5.2
+ReproSec Capsule :: v0.5.3
 Developer: IsdarlinM
 
 Capture, sanitize, replay, and package reproducible security evidence.
@@ -39,6 +39,7 @@ Compatible Sentinel Forge products add optional research capabilities through sh
 - evidence-native research context linking scope snapshots, policy decisions, validation recipes, tool provenance and counter-evidence;
 - local FastAPI API, responsive Web UI and offline synthetic demo;
 - SRIC 0.5.x workspaces, graph, lineage, notebook and evidence primitives;
+- signed update flow with safe same-version `update --force` reinstall support;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Standalone install
@@ -63,7 +64,7 @@ SRIC Core is resolved automatically. `SRIC_CORE_SOURCE` is an explicit developme
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.2`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.3`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## First five minutes
 
@@ -102,6 +103,18 @@ Authorized mutating requests additionally require method scope and human approva
 ## Web and API
 
 ReproSec serves its responsive local application and API through `reprosec web`. It is **not an operating-system web shell**.
+
+## Signed updates
+
+The updater accepts only an Ed25519-signed manifest and a SHA-256 verified wheel. Configure `REPROSEC_RELEASE_MANIFEST_URL` plus `REPROSEC_RELEASE_PUBLIC_KEY`, or pass `--manifest` and `--public-key`.
+
+```bash
+reprosec update --check
+reprosec update
+reprosec update --force
+```
+
+`--force` reinstalls the selected signed release even when that exact version is already installed. It may install a newer signed version but never downgrades; `--check` and `--force` cannot be combined. No unsigned or blind `git pull` fallback is used. Until the official signed release channel is published, release-channel configuration remains explicit.
 
 ## Validation gates
 
