@@ -1,7 +1,7 @@
 # ReproSec Capsule
 
 ```text
-ReproSec Capsule :: v0.5.4
+ReproSec Capsule :: v0.5.5
 Developer: IsdarlinM
 
 Capture, sanitize, replay, and package reproducible security evidence.
@@ -39,7 +39,7 @@ Compatible Sentinel Forge products add optional research capabilities through sh
 - evidence-native research context linking scope snapshots, policy decisions, validation recipes, tool provenance and counter-evidence;
 - local FastAPI API, responsive Web UI and offline synthetic demo;
 - SRIC 0.5.x workspaces, graph, lineage, notebook and evidence primitives;
-- signed update flow with safe same-version `update --force` reinstall support;
+- zero-config official update flow with safe same-version `update --force` reinstall support;
 - Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
@@ -65,7 +65,7 @@ SRIC Core is resolved automatically. `SRIC_CORE_SOURCE` is an explicit developme
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.4`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.5`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## First five minutes
 
@@ -107,9 +107,9 @@ ReproSec serves its responsive local application and API through `reprosec web`.
 
 The command console is **not an operating-system web shell**: it invokes only the fixed SRIC runner with `shell=False`, disabled stdin and a structured argv array. Mutating commands require explicit approval; ReproSec's own Scope, Policy, rate-limit, target-validation and approval gates remain authoritative. See `docs/web/cli-parity.md`.
 
-## Signed updates
+## Updates
 
-The updater accepts only an Ed25519-signed manifest and a SHA-256 verified wheel. Configure `REPROSEC_RELEASE_MANIFEST_URL` plus `REPROSEC_RELEASE_PUBLIC_KEY`, or pass `--manifest` and `--public-key`.
+The official update path is zero-config:
 
 ```bash
 reprosec update --check
@@ -117,7 +117,11 @@ reprosec update
 reprosec update --force
 ```
 
-`--force` reinstalls the selected signed release even when that exact version is already installed. It may install a newer signed version but never downgrades; `--check` and `--force` cannot be combined. No unsigned or blind `git pull` fallback is used. Until the official signed release channel is published, release-channel configuration remains explicit.
+Normal users do **not** provide a manifest or public key. SRIC resolves only the fixed official `IsdarlinM/reprosec` channel, requires the selected immutable release commit to be reported by GitHub as signature-verified, validates the exact source snapshot and package metadata, backs up state, installs without a shell, and verifies the installed distribution version.
+
+`--force` reinstalls the official release even when that exact version is already installed. It may install a newer official release but never downgrades; `--check` and `--force` cannot be combined. Normal upgrades require rollback metadata; same-version forced reinstalls use the verified target snapshot as the recovery package.
+
+`--manifest` and `--public-key` remain available together only as an advanced custom/private-channel override. Custom channels retain Ed25519 manifest and SHA-256 wheel verification. No blind `git pull` fallback is used. See `docs/release/update.md`.
 
 ## Validation gates
 
