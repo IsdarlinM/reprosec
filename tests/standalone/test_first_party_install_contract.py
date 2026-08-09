@@ -1,7 +1,7 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SRIC_SHA = "331bb3faaef18deed842fdc120c6debcf60294b4"
+SRIC_SHA = "435237a5378fe443736ed233124d25ef85a85b15"
 
 
 def test_first_party_manifest_pins_exact_sric_commit() -> None:
@@ -23,4 +23,4 @@ def test_installers_bootstrap_and_repair_first_party_dependencies() -> None:
 
 def test_runtime_lock_matches_sric_patch() -> None:
     text = (ROOT / "requirements" / "runtime-py311.lock").read_text(encoding="utf-8")
-    assert "sric-core==0.5.7" in text
+    assert "sric-core==0.5.8" in text
