@@ -1,7 +1,7 @@
 # ReproSec Capsule
 
 ```text
-ReproSec Capsule :: v0.5.7
+ReproSec Capsule :: v0.5.8
 Developer: IsdarlinM
 
 Capture, sanitize, replay, and package reproducible security evidence.
@@ -48,7 +48,7 @@ Compatible Sentinel Forge products add optional research capabilities through sh
 
 ## Standalone install and repair
 
-Linux:
+Linux / Termux:
 
 ```bash
 ./scripts/install-linux.sh
@@ -64,11 +64,13 @@ reprosec doctor
 reprosec capabilities
 ```
 
-SRIC Core is resolved automatically. `SRIC_CORE_SOURCE` is an explicit development/release-validation override only; installers never silently consume sibling repositories. The installers are also repair-capable: they force-reinstall the pinned first-party runtime and product, run `pip check`, verify `sric.web_console` and `sric.web_workbench`, and only then run doctor/capability/help smokes. Existing capsules, configuration and workspaces are not deleted by this repair path.
+The normal installer pins SRIC Core to an immutable GitHub commit and resolves that explicit first-party source **in the same pip transaction as ReproSec**. `sric-core` is intentionally not discovered from PyPI, so the installer never performs a separate product-only `--force-reinstall` that could trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override only.
+
+The repair path preserves capsules, configuration and workspaces. It bootstraps `pip`, `setuptools` and `wheel`, force-reinstalls constrained ReproSec plus the explicit SRIC source, runs `pip check`, verifies `sric.web_console` and `sric.web_workbench`, and only then runs doctor/capability plus `--help`, `-h` and `help` smokes. Linux persists a valid `$HOME/.local/bin` PATH entry without literal quote characters; Windows accepts any Python 3 installation that actually satisfies `>=3.11`.
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.7`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean.
+Interactive terminals display a compact subdued-green banner ordered as `ReproSec Capsule :: v0.5.8`, `Developer: IsdarlinM`, then the product purpose. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON, reports, exports and redirected stdout remain clean.
 
 The help contract covers `reprosec --help`, `reprosec -h`, `reprosec help`, `reprosec COMMAND --help`, `reprosec COMMAND -h` and `reprosec COMMAND help`.
 
@@ -128,7 +130,7 @@ reprosec update
 reprosec update --force
 ```
 
-Before an official product update, ReproSec now verifies the shared SRIC version and required modules. Supported stale 0.5.x runtimes are repaired through immutable, GitHub-signature-verified historical snapshots and the official channel; a same-version runtime missing required modules is force-reinstalled. Custom/private `--manifest` plus `--public-key` updates remain explicit and do not silently switch the core to an official channel.
+Before an official product update, ReproSec verifies the shared SRIC version and required modules. Supported stale 0.5.x runtimes are repaired through immutable, GitHub-signature-verified historical snapshots and the official channel; a same-version runtime missing required modules is force-reinstalled. Custom/private `--manifest` plus `--public-key` updates remain explicit and do not silently switch the core to an official channel.
 
 Normal users do **not** provide a manifest or public key. The official updater accepts only fixed Sentinel Forge repositories, validates immutable signed commits and source metadata, backs up state, installs without a shell and verifies the installed distribution. `--force` can reinstall the current official release or move forward, never downgrade. No blind `git pull` fallback is used.
 
@@ -139,7 +141,7 @@ python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.7 interface/runtime regression suite reproduces stale-SRIC and missing-Workbench states, checks signed transition/repair behavior, validates degraded Web 503 behavior, walks every public ReproSec command with both help flags and trailing-help normalization, and compares every ordered CLI parameter with the Web Feature Workbench schema. Existing unit/integration/E2E/security/fuzz suites remain authoritative for RCAP, import, replay, scope, DNS pinning, redaction, assertions, reporting and other business features. Destructive operations are gate-tested rather than executed solely for coverage.
+The 0.5.8 installer regression verifies the unpublished-first-party resolver topology, immutable SRIC pin, runtime lock, Linux PATH quoting, Windows Python discovery and dependency/import/help smokes. Existing interface/runtime and unit/integration/E2E/security/fuzz suites remain authoritative for RCAP, import, replay, scope, DNS pinning, redaction, assertions, reporting and other business features. Destructive operations are gate-tested rather than executed solely for coverage.
 
 Standalone and release evidence are written below `build/release-evidence/`. A release requires PASS tied to the exact commit/tree.
 
