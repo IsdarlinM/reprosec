@@ -17,7 +17,7 @@ def _runtime(version: str, *, compatible: bool, missing: tuple[str, ...] = ()) -
 
 
 def test_stale_core_and_missing_current_web_runtime_are_detected(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(bootstrap.importlib.metadata, "version", lambda _name: "0.5.11")
+    monkeypatch.setattr(bootstrap.importlib.metadata, "version", lambda _name: "0.5.12")
     monkeypatch.setattr(
         bootstrap,
         "_find_module",
@@ -26,7 +26,7 @@ def test_stale_core_and_missing_current_web_runtime_are_detected(monkeypatch: py
     result = bootstrap.status()
     assert result.compatible is False
     assert result.missing_modules == ("sric.web_runtime",)
-    assert any("older than required 0.5.12" in reason for reason in result.reasons)
+    assert any("older than required 0.5.13" in reason for reason in result.reasons)
 
 
 def test_complete_signed_transition_chain_reaches_current_floor(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -36,7 +36,7 @@ def test_complete_signed_transition_chain_reaches_current_floor(monkeypatch: pyt
         "_bridge_release",
         lambda *, current_version, target_version: transitions.append((current_version, target_version)),
     )
-    assert bootstrap._bridge_to_current_floor("0.5.5") == "0.5.12"
+    assert bootstrap._bridge_to_current_floor("0.5.5") == "0.5.13"
     assert transitions == [
         ("0.5.5", "0.5.6"),
         ("0.5.6", "0.5.7"),
@@ -45,6 +45,7 @@ def test_complete_signed_transition_chain_reaches_current_floor(monkeypatch: pyt
         ("0.5.9", "0.5.10"),
         ("0.5.10", "0.5.11"),
         ("0.5.11", "0.5.12"),
+        ("0.5.12", "0.5.13"),
     ]
 
 
@@ -64,11 +65,11 @@ def test_bridge_release_uses_only_fixed_official_repository_and_commits(monkeypa
 
     monkeypatch.setattr(bootstrap, "_updater", lambda: FakeUpdater())
     monkeypatch.setattr(bootstrap.importlib, "invalidate_caches", lambda: None)
-    bootstrap._bridge_release(current_version="0.5.11", target_version="0.5.12")
+    bootstrap._bridge_release(current_version="0.5.12", target_version="0.5.13")
     downloads = [payload for kind, payload in calls if kind == "download"]
     assert {item["commit"] for item in downloads} == {
-        bootstrap.SRIC_RELEASE_COMMITS["0.5.11"],
         bootstrap.SRIC_RELEASE_COMMITS["0.5.12"],
+        bootstrap.SRIC_RELEASE_COMMITS["0.5.13"],
     }
     assert all(item["repository"] == "IsdarlinM/sric-core" for item in downloads)
     assert all(flag is True for kind, (_path, flag) in calls if kind == "install")
@@ -76,8 +77,8 @@ def test_bridge_release_uses_only_fixed_official_repository_and_commits(monkeypa
 
 def test_same_version_missing_runtime_uses_fixed_signed_snapshot_repair(monkeypatch: pytest.MonkeyPatch) -> None:
     states = iter([
-        _runtime("0.5.12", compatible=False, missing=("sric.web_runtime",)),
-        _runtime("0.5.12", compatible=True),
+        _runtime("0.5.13", compatible=False, missing=("sric.web_runtime",)),
+        _runtime("0.5.13", compatible=True),
     ])
     repairs: list[tuple[str, str]] = []
     monkeypatch.setattr(bootstrap, "status", lambda: next(states))
@@ -88,7 +89,7 @@ def test_same_version_missing_runtime_uses_fixed_signed_snapshot_repair(monkeypa
     )
     monkeypatch.setattr(bootstrap.importlib, "invalidate_caches", lambda: None)
     assert bootstrap.ensure_for_official_update().compatible is True
-    assert repairs == [("0.5.12", "0.5.12")]
+    assert repairs == [("0.5.13", "0.5.13")]
 
 
 def test_degraded_workbench_is_503_not_process_import_failure() -> None:
