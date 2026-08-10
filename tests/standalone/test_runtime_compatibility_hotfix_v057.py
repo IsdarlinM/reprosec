@@ -19,12 +19,16 @@ def _runtime(version: str, *, compatible: bool, missing: tuple[str, ...] = ()) -
 
 
 def test_reproduces_stale_core_detection_without_importing_new_sric_helpers(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(bootstrap.importlib.metadata, "version", lambda _name: "0.5.5")
-    monkeypatch.setattr(bootstrap, "_find_module", lambda _name: False)
+    monkeypatch.setattr(bootstrap.importlib.metadata, "version", lambda _name: "0.5.10")
+    monkeypatch.setattr(
+        bootstrap,
+        "_find_module",
+        lambda name: name in {"sric.web_console", "sric.web_workbench"},
+    )
     result = bootstrap.status()
     assert result.compatible is False
-    assert result.missing_modules == ("sric.web_console", "sric.web_workbench")
-    assert any("older than required 0.5.7" in reason for reason in result.reasons)
+    assert result.missing_modules == ("sric.web_catalog",)
+    assert any("older than required 0.5.11" in reason for reason in result.reasons)
 
 
 def test_signed_transition_bridges_use_only_exact_historical_commits(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
@@ -56,8 +60,12 @@ def test_signed_transition_bridges_use_only_exact_historical_commits(monkeypatch
     assert all(flag is True for kind, (_path, flag) in calls if kind == "install")
 
 
-def test_official_update_bridges_055_through_057_without_unsafe_channel_jump(monkeypatch: pytest.MonkeyPatch) -> None:
-    states = iter([_runtime("0.5.5", compatible=False), _runtime("0.5.7", compatible=True)])
+def test_official_update_bridges_055_through_057_then_advances_to_current_floor(monkeypatch: pytest.MonkeyPatch) -> None:
+    states = iter([
+        _runtime("0.5.5", compatible=False),
+        _runtime("0.5.7", compatible=False),
+        _runtime("0.5.11", compatible=True),
+    ])
     bridges: list[str] = []
     updates: list[dict[str, object]] = []
     fake = SimpleNamespace(perform_product_update=lambda **kwargs: updates.append(kwargs))
@@ -71,13 +79,20 @@ def test_official_update_bridges_055_through_057_without_unsafe_channel_jump(mon
     result = bootstrap.ensure_for_official_update()
     assert result.compatible is True
     assert bridges == ["055-056", "056-057"]
-    assert updates == []
+    assert updates == [
+        {
+            "expected_product": "sric-core",
+            "current_version": "0.5.7",
+            "check_only": False,
+            "force": False,
+        }
+    ]
 
 
 def test_corrupt_same_version_core_forces_reinstall(monkeypatch: pytest.MonkeyPatch) -> None:
     states = iter([
-        _runtime("0.5.7", compatible=False, missing=("sric.web_workbench",)),
-        _runtime("0.5.7", compatible=True),
+        _runtime("0.5.11", compatible=False, missing=("sric.web_catalog",)),
+        _runtime("0.5.11", compatible=True),
     ])
     updates: list[dict[str, object]] = []
     fake = SimpleNamespace(perform_product_update=lambda **kwargs: updates.append(kwargs))
@@ -86,7 +101,7 @@ def test_corrupt_same_version_core_forces_reinstall(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(bootstrap, "_require_updater_api", lambda *_args: None)
     monkeypatch.setattr(bootstrap.importlib, "invalidate_caches", lambda: None)
     bootstrap.ensure_for_official_update()
-    assert updates == [{"expected_product": "sric-core", "current_version": "0.5.7", "check_only": False, "force": True}]
+    assert updates == [{"expected_product": "sric-core", "current_version": "0.5.11", "check_only": False, "force": True}]
 
 
 def test_degraded_workbench_is_503_not_process_import_failure() -> None:
