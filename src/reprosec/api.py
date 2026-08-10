@@ -68,22 +68,26 @@ def _timeline(root: Path) -> list[dict[str, object]]:
     events: list[dict[str, object]] = []
     for path in sorted((root / "requests").glob("*.json")):
         request_record = RequestRecord.model_validate_json(path.read_text(encoding="utf-8"))
-        events.append({
-            "observed_at": request_record.observed_at,
-            "type": "request",
-            "id": request_record.request_id,
-            "method": request_record.method,
-            "url": request_record.url,
-        })
+        events.append(
+            {
+                "observed_at": request_record.observed_at,
+                "type": "request",
+                "id": request_record.request_id,
+                "method": request_record.method,
+                "url": request_record.url,
+            }
+        )
     for path in sorted((root / "responses").glob("*.json")):
         response_record = ResponseRecord.model_validate_json(path.read_text(encoding="utf-8"))
-        events.append({
-            "observed_at": response_record.observed_at,
-            "type": "response",
-            "id": response_record.response_id,
-            "request_id": response_record.request_id,
-            "status": response_record.status_code,
-        })
+        events.append(
+            {
+                "observed_at": response_record.observed_at,
+                "type": "response",
+                "id": response_record.response_id,
+                "request_id": response_record.request_id,
+                "status": response_record.status_code,
+            }
+        )
     events.sort(key=lambda item: str(item["observed_at"]))
     return events
 
@@ -108,12 +112,15 @@ def create_app() -> FastAPI:
     if (web_root / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=web_root / "assets"), name="assets")
 
-    @app.get("/", include_in_schema=False)
-    async def web_index() -> FileResponse | JSONResponse:
+    @app.get("/", include_in_schema=False, response_model=None)
+    async def web_index() -> StarletteResponse:
         index = web_root / "index.html"
         if index.is_file():
             return FileResponse(index)
-        return JSONResponse(status_code=503, content={"error": "Web UI assets are not installed"})
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Web UI assets are not installed"},
+        )
 
     @app.get("/api/v1/health")
     async def health() -> dict[str, str]:
@@ -124,14 +131,31 @@ def create_app() -> FastAPI:
         return {
             "schema_version": "0.3",
             "implemented": [
-                "har_import", "raw_http_import", "curl_import", "structured_redaction",
-                "deterministic_pack_verify", "signed_manifests", "safe_replay",
-                "streaming_response_limits", "deterministic_extractors", "semantic_json_diff",
-                "timeline", "evidence_lineage", "rcap_0_3_multi_actor_sessions",
-                "authorized_http_capture", "browser_event_recording", "workflow_compiler",
-                "semantic_diff_v2", "burp_zap_import", "public_conformance_suite",
-                "replay_stability", "differential_control_design", "passive_websocket_records",
-                "passive_grpc_records", "passive_graphql_records", "capsule_comparison",
+                "har_import",
+                "raw_http_import",
+                "curl_import",
+                "structured_redaction",
+                "deterministic_pack_verify",
+                "signed_manifests",
+                "safe_replay",
+                "streaming_response_limits",
+                "deterministic_extractors",
+                "semantic_json_diff",
+                "timeline",
+                "evidence_lineage",
+                "rcap_0_3_multi_actor_sessions",
+                "authorized_http_capture",
+                "browser_event_recording",
+                "workflow_compiler",
+                "semantic_diff_v2",
+                "burp_zap_import",
+                "public_conformance_suite",
+                "replay_stability",
+                "differential_control_design",
+                "passive_websocket_records",
+                "passive_grpc_records",
+                "passive_graphql_records",
+                "capsule_comparison",
                 "capsule_minimization_plan",
             ],
             "ai_required": False,
@@ -150,10 +174,20 @@ def create_app() -> FastAPI:
     @app.get("/api/v1/workspace/inspect")
     async def workspace_inspect(path: str) -> dict[str, object]:
         with _capsule_root(path) as root:
-            metadata = dict(CapsuleMetadata.model_validate_json((root / "capsule.json").read_text(encoding="utf-8")).model_dump(mode="json"))
+            metadata = dict(
+                CapsuleMetadata.model_validate_json(
+                    (root / "capsule.json").read_text(encoding="utf-8")
+                ).model_dump(mode="json")
+            )
             metadata["counts"] = {
                 name: len(list((root / name).glob("*.json")))
-                for name in ("requests", "responses", "workflow", "assertions", "extractors")
+                for name in (
+                    "requests",
+                    "responses",
+                    "workflow",
+                    "assertions",
+                    "extractors",
+                )
             }
             return metadata
 
