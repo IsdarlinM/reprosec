@@ -52,9 +52,12 @@ def create_app() -> FastAPI:
         }
 
     try:
+        from sric.web_catalog import install_json_safe_catalog
         from sric.web_console import WebConsoleConfig, mount_web_console
+
+        install_json_safe_catalog()
     except ModuleNotFoundError as exc:
-        reason = f"missing shared Web console module: {exc.name or exc}"
+        reason = f"missing shared Web console/catalog module: {exc.name or exc}"
         _mount_degraded_workbench(app, reason)
         return app
 
