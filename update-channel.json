@@ -2,8 +2,8 @@
   "schema_version": 1,
   "product": "reprosec",
   "repository": "IsdarlinM/reprosec",
-  "version": "0.5.10",
-  "commit": "df0b14f15f9a77c70f39859d3d9deaebccfb921d",
-  "rollback_version": "0.5.8",
-  "rollback_commit": "b2a61994af8912cf94a605ea9223c505c653cc5f"
+  "version": "0.5.13",
+  "commit": "9d7aeea35e5ed71026da21ff0aef58f165731e75",
+  "rollback_version": "0.5.12",
+  "rollback_commit": "dce3fe8de3de29a2540ae4d5d8b760fad3ec598c"
 }
