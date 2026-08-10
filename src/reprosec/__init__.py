@@ -45,4 +45,4 @@ __all__ = [
     "WebSocketOpcode", "analyze_stability", "assess_differential_design", "compare_capsules",
     "plan_minimization",
 ]
-__version__ = "0.5.9"
+__version__ = "0.5.10"

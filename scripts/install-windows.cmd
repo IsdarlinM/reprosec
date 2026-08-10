@@ -39,21 +39,30 @@ if not exist "%VENV%\Scripts\python.exe" %PY_CMD% -m venv "%VENV%" || (echo Fail
 
 if defined SRIC_CORE_SOURCE (
   if not exist "%SRIC_CORE_SOURCE%\pyproject.toml" (echo SRIC_CORE_SOURCE is invalid.& exit /b 3)
-  "%VENV%\Scripts\python.exe" -m pip install --upgrade --force-reinstall -c "%CONSTRAINTS%" "%SRIC_CORE_SOURCE%" "%REPO_ROOT%" || (echo Atomic ReproSec/SRIC installation failed.& exit /b 3)
+  "%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" "%SRIC_CORE_SOURCE%" "%REPO_ROOT%" || (echo Atomic ReproSec/SRIC installation failed.& exit /b 3)
 ) else (
   if not exist "%FIRST_PARTY%" (echo Missing first-party dependency manifest: %FIRST_PARTY%& exit /b 3)
-  "%VENV%\Scripts\python.exe" -m pip install --upgrade --force-reinstall -c "%CONSTRAINTS%" -r "%FIRST_PARTY%" "%REPO_ROOT%" || (echo Atomic ReproSec/SRIC installation failed.& exit /b 3)
+  "%VENV%\Scripts\python.exe" -m pip install --upgrade -c "%CONSTRAINTS%" -r "%FIRST_PARTY%" "%REPO_ROOT%" || (echo Atomic ReproSec/SRIC installation failed.& exit /b 3)
 )
 "%VENV%\Scripts\python.exe" -m pip check || (echo Installed dependency graph is inconsistent.& exit /b 3)
-"%VENV%\Scripts\python.exe" -c "import importlib.metadata as m; import sric.web_console, sric.web_workbench; v=tuple(int(x) for x in m.version('sric-core').split('.')[:3]); raise SystemExit(0 if (0,5,7)<=v<(0,6,0) else 1)" || (echo SRIC Core runtime integrity check failed. Required ^>=0.5.7,^<0.6.& exit /b 3)
+"%VENV%\Scripts\python.exe" -c "import importlib.metadata as m; import sric.web_console, sric.web_workbench, sric.web_catalog; v=tuple(int(x) for x in m.version('sric-core').split('.')[:3]); raise SystemExit(0 if (0,5,11)<=v<(0,6,0) else 1)" || (echo SRIC Core runtime integrity check failed. Required ^>=0.5.11,^<0.6.& exit /b 3)
 
 >"%BIN_DIR%\%CMD%.cmd" echo @"%VENV%\Scripts\%CMD%.exe" %%*
 "%VENV%\Scripts\python.exe" -m sric.install_path "%BIN_DIR%" || exit /b 3
 
-"%VENV%\Scripts\%CMD%.exe" doctor || exit /b 1
-"%VENV%\Scripts\%CMD%.exe" capabilities || exit /b 1
-"%VENV%\Scripts\%CMD%.exe" --help >nul || exit /b 1
-"%VENV%\Scripts\%CMD%.exe" -h >nul || exit /b 1
-"%VENV%\Scripts\%CMD%.exe" help >nul || exit /b 1
+set "SENTINEL_BANNER=never"
+set "CHECK_LOG=%INSTALL_ROOT%\install-check.log"
+>"%CHECK_LOG%" type nul
+"%VENV%\Scripts\%CMD%.exe" doctor >>"%CHECK_LOG%" 2>&1 || goto :validation_failed
+"%VENV%\Scripts\%CMD%.exe" capabilities >>"%CHECK_LOG%" 2>&1 || goto :validation_failed
+"%VENV%\Scripts\%CMD%.exe" --help >>"%CHECK_LOG%" 2>&1 || goto :validation_failed
+"%VENV%\Scripts\%CMD%.exe" -h >>"%CHECK_LOG%" 2>&1 || goto :validation_failed
+"%VENV%\Scripts\%CMD%.exe" help >>"%CHECK_LOG%" 2>&1 || goto :validation_failed
+del /q "%CHECK_LOG%" >nul 2>&1
 echo %PROJECT% installed/repaired successfully in standalone mode.
 exit /b 0
+
+:validation_failed
+echo Installation validation failed.
+type "%CHECK_LOG%"
+exit /b 4

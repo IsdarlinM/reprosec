@@ -1,7 +1,7 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SRIC_SHA = "9979d0dfb511d349361a55dc8dab7a204803d422"
+SRIC_SHA = "a1fa38b976cd7ba8dc1ece842ebfbe008b452481"
 
 
 def test_first_party_manifest_pins_exact_sric_commit() -> None:
@@ -16,14 +16,15 @@ def test_installers_resolve_product_and_first_party_atomically() -> None:
     assert '"$SRIC_CORE_SOURCE" "$REPO_ROOT"' in linux
     assert '-r "%FIRST_PARTY%" "%REPO_ROOT%"' in windows
     assert '"%SRIC_CORE_SOURCE%" "%REPO_ROOT%"' in windows
-    assert '-c "$CONSTRAINTS" "$REPO_ROOT"' not in linux
-    assert '-c "%CONSTRAINTS%" "%REPO_ROOT%"' not in windows
     for text in (windows, linux):
-        assert "--force-reinstall" in text
+        assert "--force-reinstall" not in text
         assert "pip check" in text
         assert "sric.web_console" in text
         assert "sric.web_workbench" in text
+        assert "sric.web_catalog" in text
         assert "setuptools wheel" in text
+        assert "SENTINEL_BANNER=never" in text
+        assert "install-check.log" in text
 
 
 def test_runtime_repair_path_python_and_help_contract() -> None:
@@ -43,4 +44,4 @@ def test_runtime_repair_path_python_and_help_contract() -> None:
 
 def test_runtime_lock_matches_sric_patch() -> None:
     text = (ROOT / "requirements" / "runtime-py311.lock").read_text(encoding="utf-8")
-    assert "sric-core==0.5.10" in text
+    assert "sric-core==0.5.11" in text
