@@ -8,9 +8,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
 
-SRIC_MIN_FULL = "0.5.13"
+SRIC_MIN_FULL = "0.5.14"
 SRIC_MAX_EXCLUSIVE = "0.6.0"
-SRIC_REQUIRED_MODULES = ("sric.web_console", "sric.web_workbench", "sric.web_catalog", "sric.web_runtime")
+SRIC_REQUIRED_MODULES = (
+    "sric.web_console",
+    "sric.web_workbench",
+    "sric.web_security_workspace",
+    "sric.web_catalog",
+    "sric.web_runtime",
+)
 SRIC_REPOSITORY = "IsdarlinM/sric-core"
 SRIC_RELEASE_COMMITS: dict[str, str] = {
     "0.5.5": "6217b4e0b8b1a7b69f2f64181d1e3b22fd4bc221",
@@ -22,6 +28,7 @@ SRIC_RELEASE_COMMITS: dict[str, str] = {
     "0.5.11": "a1fa38b976cd7ba8dc1ece842ebfbe008b452481",
     "0.5.12": "4dd0ad417e55fc76fb67d582ec50234bffff2876",
     "0.5.13": "bd90fe668e4a2a23c00a39f7d63df1c092b63c12",
+    "0.5.14": "3c5d1e0eff2584d069843a5234d9d8a0357718b9",
 }
 SRIC_TRANSITIONS: dict[str, str] = {
     "0.5.5": "0.5.6",
@@ -32,6 +39,7 @@ SRIC_TRANSITIONS: dict[str, str] = {
     "0.5.10": "0.5.11",
     "0.5.11": "0.5.12",
     "0.5.12": "0.5.13",
+    "0.5.13": "0.5.14",
 }
 
 
