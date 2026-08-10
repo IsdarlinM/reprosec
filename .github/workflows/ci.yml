@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  SENTINEL_REF: ${{ github.head_ref || github.ref_name }}
+  SRIC_CORE_CI_REF: ccfef33dc2cb45f9050b17435d65b367eb1daaea
 
 jobs:
   standalone:
@@ -21,17 +21,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Require private core read token
-        shell: bash
-        env:
-          TOKEN: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
-        run: test -n "$TOKEN" || { echo 'Configure SENTINEL_FORGE_CI_TOKEN with read access to sric-core.'; exit 1; }
       - uses: actions/checkout@v4
         with:
           repository: IsdarlinM/sric-core
-          ref: ${{ env.SENTINEL_REF }}
+          ref: ${{ env.SRIC_CORE_CI_REF }}
           path: sric-core
-          token: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -54,9 +48,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: IsdarlinM/sric-core
-          ref: ${{ env.SENTINEL_REF }}
+          ref: ${{ env.SRIC_CORE_CI_REF }}
           path: sric-core
-          token: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -75,7 +68,7 @@ jobs:
           HOME="$TEST_HOME" sh scripts/uninstall-linux.sh
           test -f "$TEST_HOME/.local/share/reprosec/user-data.marker"
           test -f "$TEST_HOME/demo-capsule/capsule.json"
-      - name: Windows clean installer smoke
+      - name: Windows install/uninstall preservation smoke
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -84,6 +77,12 @@ jobs:
           $env:SRIC_CORE_SOURCE = Join-Path $env:GITHUB_WORKSPACE 'sric-core'
           New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA | Out-Null
           cmd /c scripts\install-windows.cmd
-          & "$env:LOCALAPPDATA\ReproSec\venv\Scripts\reprosec.exe" version
-          & "$env:LOCALAPPDATA\ReproSec\venv\Scripts\reprosec.exe" doctor
-          & "$env:LOCALAPPDATA\ReproSec\venv\Scripts\reprosec.exe" capabilities
+          $runtime = "$env:LOCALAPPDATA\ReproSec\venv\Scripts\reprosec.exe"
+          & $runtime version
+          & $runtime doctor
+          & $runtime capabilities
+          New-Item -ItemType Directory -Force -Path "$env:LOCALAPPDATA\ReproSec\user-data" | Out-Null
+          Set-Content -Path "$env:LOCALAPPDATA\ReproSec\user-data\preserve.marker" -Value 'preserve'
+          cmd /c scripts\uninstall-windows.cmd
+          if (Test-Path "$env:LOCALAPPDATA\ReproSec\venv") { throw 'runtime venv was not removed' }
+          if (-not (Test-Path "$env:LOCALAPPDATA\ReproSec\user-data\preserve.marker")) { throw 'user data was removed' }
