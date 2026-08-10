@@ -14,8 +14,8 @@ def _mount_degraded_workbench(app: FastAPI, reason: str) -> None:
     async def workbench_unavailable() -> HTMLResponse:
         return HTMLResponse(
             "<h1>Sentinel Forge runtime repair required</h1>"
-            "<p>The native ReproSec dashboard remains available, but the shared Web Feature "
-            "Workbench cannot start because SRIC Core is incompatible.</p>"
+            "<p>The native ReproSec dashboard remains available, but the shared Security "
+            "Workspace cannot start because SRIC Core is incompatible.</p>"
             f"<pre>{reason}</pre><p>Run <code>reprosec doctor</code> and then "
             "<code>reprosec update</code>, or rerun the installer.</p>",
             status_code=503,
@@ -69,9 +69,9 @@ def create_app() -> FastAPI:
     )
     manager = mount_web_console(app, config)
     try:
-        from sric.web_workbench import mount_feature_workbench
+        from sric.web_security_workspace import mount_security_workspace
     except ModuleNotFoundError as exc:
-        _mount_degraded_workbench(app, f"missing shared Workbench module: {exc.name or exc}")
+        _mount_degraded_workbench(app, f"missing shared Security Workspace module: {exc.name or exc}")
     else:
-        mount_feature_workbench(app, config, manager)
+        mount_security_workspace(app, config, manager)
     return app
