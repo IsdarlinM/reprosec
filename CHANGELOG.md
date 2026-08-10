@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.12 - 2026-08-10
+- Aligned ReproSec package metadata, runtime lock, bootstrap, `doctor` and Linux/Windows installers to SRIC Core `>=0.5.12,<0.6`.
+- Pinned clean/repair installation to signed SRIC Core main commit `4dd0ad417e55fc76fb67d582ec50234bffff2876` and added `sric.web_runtime` to runtime integrity checks.
+- Replaced the incomplete stale-core update bridge with a fixed GitHub-signature-verified sequential chain from SRIC 0.5.5 through 0.5.12; same-version corrupt 0.5.12 repairs from the fixed signed snapshot.
+- Adopted shared SRIC 0.5.12 operational exception containment, structured catalog 503 handling, bounded child reaping, SSE-safe terminal-job retention and Job Engine secret redaction without duplicating shared code.
+- Updated installer/runtime regressions for the exact pin/lock/transition chain while retaining exhaustive CLI help/argument-to-Web parity and ReproSec Scope/Policy/rate/approval evidence controls.
+
 ## 0.5.10 - 2026-08-09
 - Adopted signed SRIC Core 0.5.11 and its JSON-safe Web command catalog to prevent opaque `/api/v1/console/catalog` serialization failures.
 - Updated Linux/Termux and Windows installers to keep normal installation atomic/idempotent with no `--force-reinstall`, while explicit update/repair force behavior remains separate.
