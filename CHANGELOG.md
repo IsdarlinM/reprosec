@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.14 - 2026-08-10
+- Replaced the previous shared green three-column Workbench with the SRIC Core 0.5.14 Sentinel Forge Security Workspace: desktop product rail, Operations Library, dedicated Operation Workspace, separate execution evidence/output and full-width Recent Activity.
+- Adopted professional offline Segoe UI Variable/Aptos/system typography and Cascadia Code/SFMono/Consolas evidence output with a restrained graphite/slate + teal palette and no external font/CDN dependency.
+- Preserved exact CLI/Web parity, fixed-runner `shell=False`, no user-supplied argv, ReproSec Scope/Policy/rate/approval controls, CSRF protection, secret redaction and evidence semantics.
+- Raised the SRIC floor to `>=0.5.14,<0.6`, pinned GitHub-verified shared-core merge `3c5d1e0eff2584d069843a5234d9d8a0357718b9`, and added the 0.5.13 -> 0.5.14 runtime bridge.
+- Updated Linux/Windows installers and `doctor` to verify `sric.web_security_workspace` and the canonical SRIC 0.5.14 range.
+- Added Security Workspace v3 E2E coverage plus an exhaustive offline dispatch/validation smoke for every public ReproSec CLI command.
+- Hosted jobs that never execute steps are not treated as PASS; merge/release state and execution evidence remain separate.
+
 ## 0.5.12 - 2026-08-10
 - Aligned ReproSec package metadata, runtime lock, bootstrap, `doctor` and Linux/Windows installers to SRIC Core `>=0.5.12,<0.6`.
 - Pinned clean/repair installation to signed SRIC Core main commit `4dd0ad417e55fc76fb67d582ec50234bffff2876` and added `sric.web_runtime` to runtime integrity checks.
