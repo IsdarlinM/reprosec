@@ -10,6 +10,19 @@ from sric.web_workbench import build_feature_catalog
 
 runner = CliRunner()
 
+ALLOWED_CONTROLS = {
+    "text",
+    "path",
+    "number",
+    "flag",
+    "tri-state",
+    "count",
+    "multi-text",
+    "multi-value",
+    "select",
+    "multi-select",
+}
+
 
 def test_every_public_cli_command_and_argument_is_represented_in_workbench() -> None:
     cli = {item["path"]: item for item in build_command_catalog("reprosec.cli_all")}
@@ -23,9 +36,7 @@ def test_every_public_cli_command_and_argument_is_represented_in_workbench() -> 
         assert web[path]["classification"] == command["classification"]
         assert web[path]["approval_required"] == command["approval_required"]
         for param in web[path]["params"]:
-            assert param["control"] in {
-                "text", "number", "flag", "tri-state", "count", "multi-text"
-            }
+            assert param["control"] in ALLOWED_CONTROLS
 
 
 def test_every_public_cli_command_help_exposes_all_options_and_required_arguments() -> None:
@@ -43,23 +54,32 @@ def test_every_public_cli_command_help_exposes_all_options_and_required_argument
                 assert param["name"].lower().replace("_", "-") in normalized
 
 
-def test_workbench_is_mounted_and_reports_complete_contract() -> None:
+def test_workbench_is_mounted_and_reports_complete_guided_contract() -> None:
     client = TestClient(create_app())
     page = client.get("/workbench")
     assert page.status_code == 200
     assert "ReproSec Capsule" in page.text
+    assert "No command syntax is required" in page.text
+    assert "Advanced argv" not in page.text
+    assert "Additional arguments" not in page.text
+    assert 'href="/console"' not in page.text
+
     catalog = client.get("/api/v1/workbench/catalog").json()
+    assert catalog["schema_version"] == 2
     assert catalog["contract"]["complete"] is True
     assert catalog["execution"]["shell"] is False
     assert catalog["execution"]["arbitrary_executable"] is False
+    assert catalog["execution"]["user_supplied_argv"] is False
     assert {item["path"] for item in catalog["features"]} == {
         item["path"] for item in build_command_catalog("reprosec.cli_all")
     }
 
 
-def test_native_dashboard_links_to_all_features_and_advanced_console() -> None:
+def test_native_dashboard_points_to_security_console_not_argv_console() -> None:
     client = TestClient(create_app())
     page = client.get("/")
     assert page.status_code == 200
     assert 'href="/workbench"' in page.text
-    assert 'href="/console"' in page.text
+    assert "Security Console" in page.text
+    assert 'href="/console"' not in page.text
+    assert "Advanced Console" not in page.text
