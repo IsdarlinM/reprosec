@@ -1,7 +1,7 @@
 # ReproSec Capsule
 
 ```text
-ReproSec Capsule :: v0.5.13
+ReproSec Capsule :: v0.5.14
 Developer: IsdarlinM
 
 Capture, sanitize, replay, and package reproducible security evidence.
@@ -13,7 +13,7 @@ ReproSec is the reference implementation of `.rcap`: an open, deterministic cont
 
 ## Standalone by design
 
-ReproSec is independently installable and useful. It requires **SRIC Core >=0.5.13,<0.6** for common evidence/provenance/policy/Web/runtime primitives, but AuthTwin, FossilScope, TrustBoundary Mapper and Exposure DNA are never required for capture, import, replay, validation, reporting, CLI, API or Web UI.
+ReproSec is independently installable and useful. It requires **SRIC Core >=0.5.14,<0.6** for common evidence/provenance/policy/Web/runtime primitives, but AuthTwin, FossilScope, TrustBoundary Mapper and Exposure DNA are never required for capture, import, replay, validation, reporting, CLI, API or Web UI.
 
 ```bash
 reprosec doctor
@@ -38,15 +38,16 @@ Compatible Sentinel Forge products add optional capabilities through shared cont
 - evidence-native research context linking scope snapshots, policy decisions, validation recipes, tool provenance and counter-evidence;
 - local FastAPI API, responsive Web UI and offline synthetic demo;
 - SRIC workspaces, graph, lineage, notebook and evidence primitives;
-- zero-config product update flow with same-version `update --force`, rollback and first-party runtime repair;
+- zero-config product update flow with rollback and first-party runtime repair;
 - exact SRIC version/module compatibility checks in `doctor` and the local API;
-- guided Web Security Console with every public ReproSec CLI capability represented as operation cards and typed responsive controls;
-- checkboxes/tri-state selectors for flags, combo/select controls for closed choices, numeric/path controls, repeated-value controls and protected sensitive fields;
+- shared **Sentinel Forge Security Workspace** with desktop product rail, Operations Library, dedicated Operation Workspace, separate execution evidence/output and full-width Recent Activity;
+- professional offline Segoe UI Variable/Aptos/system typography and Cascadia Code/SFMono/Consolas evidence output with a restrained graphite/slate + teal palette;
+- structured controls for every public CLI capability with no free-form command/argv UI;
 - JSON-safe shared Web capability catalog generation;
-- structured redacted HTTP 503 catalog failures, bounded Web child reaping, SSE-safe retired-job retention and persisted Job Engine secret redaction from SRIC 0.5.13;
+- structured redacted HTTP 503 catalog failures, bounded Web child reaping, SSE-safe retired-job retention and persisted Job Engine secret redaction;
 - degraded Web mode preserving the native dashboard with actionable compatibility 503s;
-- fixed-runner execution with exact CLI-tree parity and real-time jobs while keeping free-form command/argv entry out of the user interface;
-- professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
+- fixed-runner execution with exact CLI-tree parity and real-time jobs;
+- professional Rich/Typer terminal presentation with `--no-color` support.
 
 ## Standalone install and repair
 
@@ -66,9 +67,9 @@ reprosec doctor
 reprosec capabilities
 ```
 
-The installer pins SRIC Core to immutable GitHub-verified commit `bd90fe668e4a2a23c00a39f7d63df1c092b63c12` and resolves that explicit first-party source in the same pip transaction as ReproSec. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
+The installer pins SRIC Core to immutable GitHub-verified commit `3c5d1e0eff2584d069843a5234d9d8a0357718b9` and resolves that explicit first-party source in the same pip transaction as ReproSec. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
 
-The repair path preserves capsules, configuration and workspaces. It validates host Python and any existing venv; a stale/incomplete/broken environment rebuilds only the isolated ReproSec venv. It bootstraps `pip`, `setuptools` and `wheel`, runs `pip check`, imports `sric.web_console`, `sric.web_workbench`, `sric.web_catalog` and `sric.web_runtime`, requires SRIC `>=0.5.13,<0.6`, and smoke-tests doctor/capabilities plus all root help aliases before reporting success.
+The repair path preserves capsules, configuration and workspaces. It validates host Python and any existing venv; a stale/incomplete/broken environment rebuilds only the isolated ReproSec venv. It bootstraps `pip`, `setuptools` and `wheel`, runs `pip check`, imports `sric.web_console`, `sric.web_workbench`, `sric.web_security_workspace`, `sric.web_catalog` and `sric.web_runtime`, requires SRIC `>=0.5.14,<0.6`, and smoke-tests version/doctor/capabilities plus all root help aliases before reporting success.
 
 Installer-internal smokes use `SENTINEL_BANNER=never` and a temporary validation log. Successful installation therefore does not repeat the banner; failed smokes print captured diagnostics. Normal installation does not use `--force-reinstall`.
 
@@ -76,7 +77,7 @@ Termux prefers a writable `$PREFIX/bin` already present in `PATH`; standard Linu
 
 ## CLI presentation and help contract
 
-Interactive terminals display `ReproSec Capsule :: v0.5.13`, `Developer: IsdarlinM`, then the purpose statement. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain output.
+Interactive terminals display `ReproSec Capsule :: v0.5.14`, `Developer: IsdarlinM`, then the purpose statement. Use `reprosec --no-color COMMAND`, `reprosec COMMAND --no-color`, or `NO_COLOR=1` for plain output.
 
 Supported help forms:
 
@@ -127,17 +128,15 @@ Authorized mutating requests additionally require method scope and human approva
 
 ## Web and API
 
-`reprosec web` serves the native evidence dashboard plus:
+`reprosec web` serves the native evidence dashboard plus `/workbench`, the primary **Sentinel Forge Security Workspace**, `/console`, a compatibility alias, and `/api/v1/runtime-compatibility` for exact shared-runtime diagnostics.
 
-- `/workbench` — the primary guided Security Console for every public `reprosec.cli_all` capability/parameter;
-- `/console` — compatibility alias that opens the guided Security Console; it is not an argv-oriented user interface;
-- `/api/v1/runtime-compatibility` — exact shared-runtime diagnostic.
+The desktop Security Workspace is deliberately organized differently from the previous three-column green console: a persistent Sentinel Forge product rail, a two-column Operations Library + Operation Workspace, and a full-width Recent Activity execution-history panel beneath the main workspace. Configuration, approval and execution evidence/output are separate surfaces. Mobile collapses to guided Operations / Configure / Activity views.
 
-The Workbench schema is generated from the installed CLI tree; parity coverage fails when a capability or parameter disappears from Web representation. Command metadata is normalized to JSON-safe primitives and enriched with choices, bounds and path semantics so the browser can choose appropriate controls without duplicating product logic. A catalog-construction failure returns a bounded/redacted HTTP 503 rather than an opaque HTTP 500.
+The workspace schema is generated from the installed CLI tree; parity coverage fails when a capability or parameter disappears from Web representation. Command metadata is normalized to JSON-safe primitives and enriched with choices, bounds and path semantics so the browser can choose appropriate controls without duplicating product logic. Shared UI assets are same-origin and require no external fonts or CDN resources.
 
-Users do not type CLI command paths, option names, flags or free-form argv. Structured values are deterministically serialized only as an internal transport detail to the fixed runner. Execution uses `shell=False`, disabled stdin, CSRF protection, secret redaction, bounded/cancellable jobs, approval gates and SSE output. Timed-out child commands use bounded terminate/kill/wait handling plus background reaping if needed; recently pruned terminal jobs remain briefly available to active status/SSE readers. ReproSec's Scope, Policy, rate-limit, target validation and approval gates remain authoritative for capture/replay and all other active operations.
+Users do not type CLI command paths, option names, flags or free-form argv. Structured values are deterministically serialized only as an internal transport detail to the fixed runner. Execution uses `shell=False`, disabled stdin, CSRF protection, secret redaction, bounded/cancellable jobs, approval gates and SSE output. ReproSec's Scope, Policy, rate-limit, target validation and approval gates remain authoritative for capture/replay and all other active operations.
 
-The native RCAP dashboard keeps real evidence actions such as Inspect, Redaction preview, Timeline and Verify; the Security Console complements those domain views instead of turning the dashboard into a terminal emulator.
+The native RCAP dashboard keeps real evidence actions such as Inspect, Redaction preview, Timeline and Verify; the Security Workspace complements those domain views instead of turning the dashboard into a terminal emulator.
 
 ## Updates and shared-runtime repair
 
@@ -147,25 +146,33 @@ reprosec update
 reprosec update --force
 ```
 
-Supported stale SRIC runtimes are advanced through immutable GitHub-signature-verified snapshots one release at a time from 0.5.5 through 0.5.13, avoiding unsafe rollback-metadata jumps. A same-version corrupt 0.5.13 runtime is repaired from the fixed verified 0.5.13 snapshot. No blind `git pull` fallback is used.
-
-The ReproSec 0.5.13 official channel points to a GitHub-verified release commit and carries rollback metadata for the immediately preceding verified 0.5.12 snapshot.
+Supported stale SRIC runtimes are advanced through immutable GitHub-signature-verified snapshots one release at a time from 0.5.5 through 0.5.14. The 0.5.13 -> 0.5.14 transition adds the shared Security Workspace while retaining the fixed runner and existing catalog/runtime compatibility layer. No blind `git pull` fallback is used.
 
 ## Validation gates
 
 ```bash
+python -m pytest -q tests/e2e/test_all_commands_dispatch_v0514.py
+python -m pytest -q tests/e2e/test_security_workspace_v0514.py
 python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.13 standalone regressions walk public ReproSec commands and help forms, exact ordered CLI/Web parameter parity, structured control types, absence of free-form argv UI, runtime compatibility and installer pinning. Existing suites cover native Web actions, local GET/POST APIs, RCAP parsers/importers, capture/replay, scope/DNS pinning, redaction, assertions, reports, fuzz/security and destructive-action gates.
+The command gate enumerates every public ReproSec leaf command and dispatches it through real Typer parsing/validation with network/server/update behavior kept offline. Existing deeper suites cover RCAP parsers/importers, capture/replay, scope/DNS pinning, redaction, assertions, reports, fuzz/security and destructive-action gates.
 
-`TEST_EVIDENCE.md` remains authoritative for actual execution. GitHub-hosted runners are currently blocked by an account billing lock; the affected workflows execute zero steps, are not PASS, and do not prove ReproSec's full exact-commit release gate. The current execution environment also lacks GitHub network/DNS access, so no substitute clone-based local full-suite PASS is claimed.
+`TEST_EVIDENCE.md` remains authoritative for actual execution. A hosted job that never starts its steps is not treated as PASS.
 
 ## Uninstall
 
+Linux / Termux:
+
 ```bash
 ./scripts/uninstall-linux.sh
+```
+
+Windows:
+
+```cmd
+scripts\uninstall-windows.cmd
 ```
 
 Runtime files are removed while capsules, configuration and other user data are preserved.
