@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  SRIC_CORE_CI_REF: ccfef33dc2cb45f9050b17435d65b367eb1daaea
+  SRIC_CORE_CI_REF: 3c5d1e0eff2584d069843a5234d9d8a0357718b9
 
 jobs:
   standalone:
@@ -34,6 +34,10 @@ jobs:
       - run: python -m pip install -e ./sric-core
       - run: python -m pip install -e . --no-deps
       - run: python -m pip install pytest ruff mypy build pip-audit hypothesis httpx httpcore h2
+      - name: Every public CLI command dispatch/validation smoke
+        run: python -m pytest -q tests/e2e/test_all_commands_dispatch_v0514.py
+      - name: Shared Security Workspace contract
+        run: python -m pytest -q tests/e2e/test_security_workspace_v0514.py
       - run: python -m sric.standalone_gate --root .
       - run: python scripts/release-gate.py --quick
 
