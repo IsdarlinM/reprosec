@@ -8,13 +8,29 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
 
-SRIC_MIN_FULL = "0.5.11"
+SRIC_MIN_FULL = "0.5.12"
 SRIC_MAX_EXCLUSIVE = "0.6.0"
-SRIC_REQUIRED_MODULES = ("sric.web_console", "sric.web_workbench", "sric.web_catalog")
+SRIC_REQUIRED_MODULES = ("sric.web_console", "sric.web_workbench", "sric.web_catalog", "sric.web_runtime")
 SRIC_REPOSITORY = "IsdarlinM/sric-core"
-SRIC_055_COMMIT = "6217b4e0b8b1a7b69f2f64181d1e3b22fd4bc221"
-SRIC_056_COMMIT = "8858854e22a6d1154e676c4cb6684b87d610d36f"
-SRIC_057_COMMIT = "331bb3faaef18deed842fdc120c6debcf60294b4"
+SRIC_RELEASE_COMMITS: dict[str, str] = {
+    "0.5.5": "6217b4e0b8b1a7b69f2f64181d1e3b22fd4bc221",
+    "0.5.6": "8858854e22a6d1154e676c4cb6684b87d610d36f",
+    "0.5.7": "331bb3faaef18deed842fdc120c6debcf60294b4",
+    "0.5.8": "435237a5378fe443736ed233124d25ef85a85b15",
+    "0.5.9": "5fd498e86801aa82f6eb20bb3cd6d4e254bf9598",
+    "0.5.10": "9979d0dfb511d349361a55dc8dab7a204803d422",
+    "0.5.11": "a1fa38b976cd7ba8dc1ece842ebfbe008b452481",
+    "0.5.12": "4dd0ad417e55fc76fb67d582ec50234bffff2876",
+}
+SRIC_TRANSITIONS: dict[str, str] = {
+    "0.5.5": "0.5.6",
+    "0.5.6": "0.5.7",
+    "0.5.7": "0.5.8",
+    "0.5.8": "0.5.9",
+    "0.5.9": "0.5.10",
+    "0.5.10": "0.5.11",
+    "0.5.11": "0.5.12",
+}
 
 
 @dataclass(frozen=True)
@@ -102,13 +118,12 @@ def _require_updater_api(updater: ModuleType, *names: str) -> None:
         )
 
 
-def _bridge_release(
-    *,
-    current_version: str,
-    current_commit: str,
-    target_version: str,
-    target_commit: str,
-) -> None:
+def _bridge_release(*, current_version: str, target_version: str) -> None:
+    try:
+        current_commit = SRIC_RELEASE_COMMITS[current_version]
+        target_commit = SRIC_RELEASE_COMMITS[target_version]
+    except KeyError as exc:
+        raise RuntimeError("unsupported SRIC bootstrap transition") from exc
     updater = _updater()
     _require_updater_api(
         updater,
@@ -142,22 +157,17 @@ def _bridge_release(
     importlib.invalidate_caches()
 
 
-def _upgrade_055_to_056() -> None:
-    _bridge_release(
-        current_version="0.5.5",
-        current_commit=SRIC_055_COMMIT,
-        target_version="0.5.6",
-        target_commit=SRIC_056_COMMIT,
-    )
-
-
-def _upgrade_056_to_057() -> None:
-    _bridge_release(
-        current_version="0.5.6",
-        current_commit=SRIC_056_COMMIT,
-        target_version="0.5.7",
-        target_commit=SRIC_057_COMMIT,
-    )
+def _bridge_to_current_floor(version: str) -> str:
+    working = version
+    while _compare_semver(working, SRIC_MIN_FULL) < 0:
+        target = SRIC_TRANSITIONS.get(working)
+        if target is None:
+            raise RuntimeError(
+                f"sric-core {working} cannot be safely bridged to {SRIC_MIN_FULL}; rerun the product installer"
+            )
+        _bridge_release(current_version=working, target_version=target)
+        working = target
+    return working
 
 
 def ensure_for_official_update() -> SRICRuntimeStatus:
@@ -175,17 +185,8 @@ def ensure_for_official_update() -> SRICRuntimeStatus:
         raise RuntimeError("installed sric-core version cannot be safely compared") from exc
 
     working_version = current.version
-    bridged = False
-    if working_version == "0.5.5":
-        _upgrade_055_to_056()
-        working_version = "0.5.6"
-        bridged = True
-    if working_version == "0.5.6":
-        _upgrade_056_to_057()
-        working_version = "0.5.7"
-        bridged = True
-
-    if bridged:
+    if _compare_semver(working_version, SRIC_MIN_FULL) < 0:
+        working_version = _bridge_to_current_floor(working_version)
         importlib.invalidate_caches()
         repaired = status()
         if repaired.compatible:
@@ -193,20 +194,21 @@ def ensure_for_official_update() -> SRICRuntimeStatus:
         if repaired.version is not None:
             working_version = repaired.version
 
-    updater = _updater()
-    _require_updater_api(updater, "perform_product_update")
-    force = _compare_semver(working_version, SRIC_MIN_FULL) >= 0
-    updater.perform_product_update(
-        expected_product="sric-core",
-        current_version=working_version,
-        check_only=False,
-        force=force,
-    )
+    if working_version == SRIC_MIN_FULL:
+        _bridge_release(current_version=working_version, target_version=working_version)
+    else:
+        updater = _updater()
+        _require_updater_api(updater, "perform_product_update")
+        updater.perform_product_update(
+            expected_product="sric-core",
+            current_version=working_version,
+            check_only=False,
+            force=True,
+        )
     importlib.invalidate_caches()
     repaired = status()
     if not repaired.compatible:
         raise RuntimeError(
-            "SRIC repair finished but compatibility is still invalid: "
-            + "; ".join(repaired.reasons)
+            "SRIC repair finished but compatibility is still invalid: " + "; ".join(repaired.reasons)
         )
     return repaired
