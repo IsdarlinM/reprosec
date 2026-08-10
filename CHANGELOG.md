@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.10 - 2026-08-09
+- Adopted signed SRIC Core 0.5.11 and its JSON-safe Web command catalog to prevent opaque `/api/v1/console/catalog` serialization failures.
+- Updated Linux/Termux and Windows installers to keep normal installation atomic/idempotent with no `--force-reinstall`, while explicit update/repair force behavior remains separate.
+- Installer-internal doctor/capability/help smokes now use `SENTINEL_BANNER=never` and a temporary diagnostic log, eliminating repeated banners on successful installs without hiding failures.
+- Added regressions for the exact SRIC pin/lock, quiet installer contract and HTTP-200 Console/Workbench catalogs with complete CLI/Web coverage.
+
 ## 0.5.9 - 2026-08-09
 - Hardened repair installation so obsolete, incomplete or broken Python environments rebuild only the isolated ReproSec venv while preserving capsules, configuration and workspaces.
 - Termux now prefers a writable `$PREFIX/bin` already present in `PATH`, making `reprosec` immediately reachable after installation.
