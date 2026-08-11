@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional, cast
 
 import typer
 from sric.scope import ScopeEngine, ScopePolicy
@@ -40,8 +40,8 @@ def init_vnext(path:Path,title:str=typer.Option(...,"--title"),workspace:Optiona
 def import_burp_cmd(path: Path, capsule: Path = typer.Option(..., "--capsule")) -> None:
     """Import a bounded Burp XML export as data; never execute requests."""
     reqs,resps=import_burp_xml(path)
-    for r in reqs: add_request(capsule,r); add_workflow_step(capsule,WorkflowStep(actor="Actor A",request_id=r.request_id))
-    for r in resps: add_response(capsule,r)
+    for request_record in reqs: add_request(capsule,request_record); add_workflow_step(capsule,WorkflowStep(actor="Actor A",request_id=request_record.request_id))
+    for response_record in resps: add_response(capsule,response_record)
     typer.echo(json.dumps({"requests":len(reqs),"responses":len(resps)}))
 
 
@@ -49,8 +49,8 @@ def import_burp_cmd(path: Path, capsule: Path = typer.Option(..., "--capsule")) 
 def import_zap_cmd(path: Path, capsule: Path = typer.Option(..., "--capsule")) -> None:
     """Import a bounded ZAP JSON/HAR export as data only."""
     reqs,resps=import_zap_json(path)
-    for r in reqs: add_request(capsule,r); add_workflow_step(capsule,WorkflowStep(actor="Actor A",request_id=r.request_id))
-    for r in resps: add_response(capsule,r)
+    for request_record in reqs: add_request(capsule,request_record); add_workflow_step(capsule,WorkflowStep(actor="Actor A",request_id=request_record.request_id))
+    for response_record in resps: add_response(capsule,response_record)
     typer.echo(json.dumps({"requests":len(reqs),"responses":len(resps)}))
 
 
@@ -98,7 +98,6 @@ def diff_v2(capsule: Path, expected_response_id: str, observed_response_id: str)
     """Compare semantic/body/header/cookie/redirect/timing/network differences."""
     expected=ResponseRecord.model_validate_json((capsule/"responses"/f"{expected_response_id}.json").read_text())
     observed=ResponseRecord.model_validate_json((capsule/"responses"/f"{observed_response_id}.json").read_text())
-    from dataclasses import asdict
     typer.echo(json.dumps(asdict(diff_responses_v2(expected,observed)),indent=2,default=str))
 
 
@@ -107,13 +106,14 @@ def validation_record(capsule: Path, result: str, evidence: list[str]=typer.Opti
     """Record deterministic validation evidence separately from capture/AI hypotheses."""
     if result not in {"VALIDATED","REJECTED","UNKNOWN"}:raise typer.BadParameter("result must be VALIDATED, REJECTED or UNKNOWN")
     if result=="VALIDATED" and (not deterministic or not evidence):raise typer.BadParameter("VALIDATED requires deterministic evidence")
-    rec=ValidationRecord(result=result,evidence_ids=evidence,request_id=request_id,deterministic=deterministic);add_validation(capsule,rec);typer.echo(rec.model_dump_json(indent=2))
+    validation_result = cast(Literal["VALIDATED", "REJECTED", "UNKNOWN"], result)
+    rec=ValidationRecord(result=validation_result,evidence_ids=evidence,request_id=request_id,deterministic=deterministic);add_validation(capsule,rec);typer.echo(rec.model_dump_json(indent=2))
 
 
 @app.command("conformance-suite")
 def conformance_suite() -> None:
     """Run the public self-contained RCAP 0.3 conformance matrix."""
-    payload=run_public_suite();typer.echo(json.dumps(payload,indent=2));
+    payload=run_public_suite();typer.echo(json.dumps(payload,indent=2))
     if payload["passed"]!=payload["total"]:raise typer.Exit(1)
 
 

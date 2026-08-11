@@ -34,7 +34,7 @@ def doctor(
         "sric": {
             "ok": runtime.compatible,
             "version": runtime.version,
-            "required": ">=0.5.14,<0.6",
+            "required": ">=0.5.16,<0.6",
             "missing_modules": list(runtime.missing_modules),
             "reasons": list(runtime.reasons),
         },

@@ -5,7 +5,6 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 from urllib.parse import urlsplit
 
 from sric.action_classification import classify_http_action
@@ -177,12 +176,12 @@ class LocalCaptureProxy:
             protocol_version="HTTP/1.1"
             def _handle(self)->None:
                 if self.command=="CONNECT":
-                    host,_,port_text=self.path.partition(":");port=int(port_text or 443);CaptureRecorder(outer.capsule,outer.scope).record_tls_tunnel(host,port);body=b"CONNECT interception disabled; TLS tunnel metadata recorded only.\n";self.send_response(501);self.send_header("Content-Type","text/plain");self.send_header("Content-Length",str(len(body)));self.end_headers();self.wfile.write(body);return
+                    connect_host,_,port_text=self.path.partition(":");port=int(port_text or 443);CaptureRecorder(outer.capsule,outer.scope).record_tls_tunnel(connect_host,port);response_body=b"CONNECT interception disabled; TLS tunnel metadata recorded only.\n";self.send_response(501);self.send_header("Content-Type","text/plain");self.send_header("Content-Length",str(len(response_body)));self.end_headers();self.wfile.write(response_body);return
                 url=self.path
                 if not url.startswith(("http://","https://")):
-                    host=self.headers.get("Host")
-                    if not host:self.send_error(400,"Host required");return
-                    url=f"http://{host}{self.path}"
+                    header_host=self.headers.get("Host")
+                    if not header_host:self.send_error(400,"Host required");return
+                    url=f"http://{header_host}{self.path}"
                 length=int(self.headers.get("Content-Length","0") or 0)
                 if length>10*1024*1024:self.send_error(413,"request body too large");return
                 body=self.rfile.read(length) if length else None

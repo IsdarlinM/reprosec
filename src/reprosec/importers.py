@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import re
 import shlex
 from pathlib import Path
 from typing import Any
@@ -126,7 +127,10 @@ def import_har(path: Path) -> tuple[list[RequestRecord], list[ResponseRecord]]:
 
 
 def import_raw_http(path: Path, *, scheme: str = "https", host: str | None = None) -> RequestRecord:
-    text = _read_limited(path).decode("utf-8", errors="strict").replace("\r\n", "\n")
+    text = _read_limited(path).decode("utf-8", errors="strict")
+    # Text-mode fixtures and proxy exports written on Windows can contain
+    # CRCRLF. Normalize every CR/LF representation before parsing headers.
+    text = re.sub(r"\r+\n", "\n", text).replace("\r", "\n")
     head, _, body = text.partition("\n\n")
     lines = head.splitlines()
     if not lines:
@@ -346,7 +350,7 @@ def import_zap_json(path: Path) -> tuple[list[RequestRecord], list[ResponseRecor
     messages = raw.get("messages", []) if isinstance(raw, dict) else []
     if not isinstance(messages, list):
         raise ValueError("invalid ZAP JSON: messages must be a list")
-    requests=[];responses=[]
+    requests: list[RequestRecord]=[];responses: list[ResponseRecord]=[]
     for message in messages:
         if not isinstance(message,dict): continue
         req_raw=message.get("request")

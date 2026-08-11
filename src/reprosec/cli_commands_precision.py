@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import typer
 from pydantic import ValidationError
@@ -113,7 +114,7 @@ def protocol_validate_command(
     """Validate passive protocol records as untrusted data; never replay them."""
     raw = _read_json(path)
     records = raw if isinstance(raw, list) else [raw]
-    model = {
+    model: Any = {
         ProtocolKind.WEBSOCKET: WebSocketFrameRecord,
         ProtocolKind.GRPC: GrpcMessageRecord,
         ProtocolKind.GRAPHQL: GraphQLOperationRecord,

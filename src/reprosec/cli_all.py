@@ -12,14 +12,14 @@ from . import cli_capabilities as _cli_capabilities  # noqa: F401
 from . import cli_update as _cli_update  # noqa: F401,E402
 
 
-def _create_complete_app(*args: object, **kwargs: object) -> object:
+def _create_complete_app() -> object:
     """Load optional/shared Web modules only when the Web command is invoked."""
     from .api_all import create_app
 
-    return create_app(*args, **kwargs)
+    return create_app()
 
 
-_runtime.create_app = _create_complete_app
+setattr(_runtime, "create_app", _create_complete_app)
 
 __all__ = ["BRAND", "app", "run"]
 
@@ -28,16 +28,26 @@ BRAND = CLIBrand(
     description="Capture, sanitize, replay, and package reproducible security evidence.",
     version=__version__,
 )
-app.rich_markup_mode = "rich"
+app.rich_markup_mode = None
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def branded_main(
     ctx: typer.Context,
     no_color: bool = no_color_option(),
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-V",
+        is_eager=True,
+        help="Show the ReproSec version and exit.",
+    ),
 ) -> None:
     """ReproSec CLI presentation controls."""
 
+    if version:
+        typer.echo(__version__)
+        raise typer.Exit()
     configure_cli_context(ctx, no_color=no_color)
 
 

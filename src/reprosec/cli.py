@@ -48,7 +48,7 @@ def help_command(ctx: typer.Context, command: Optional[str] = typer.Argument(Non
 def normalize_help_argv(argv: list[str]) -> list[str]:
     """Normalize trailing `help` so root and nested commands share one help source."""
     normalized = list(argv)
-    if len(normalized) >= 3 and normalized[-1] == "help" and normalized[1] != "help":
+    if len(normalized) >= 3 and normalized[-1] == "help":
         normalized[-1] = "--help"
     return normalized
 

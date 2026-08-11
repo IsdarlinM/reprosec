@@ -226,7 +226,7 @@ def create_app() -> FastAPI:
 
     @app.post("/api/v1/protocol/validate")
     async def protocol_validate(request: ProtocolValidationRequest) -> dict[str, object]:
-        model: type[BaseModel] = {
+        model: Any = {
             ProtocolKind.WEBSOCKET: WebSocketFrameRecord,
             ProtocolKind.GRPC: GrpcMessageRecord,
             ProtocolKind.GRAPHQL: GraphQLOperationRecord,

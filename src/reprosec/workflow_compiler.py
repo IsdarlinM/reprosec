@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
-from urllib.parse import urlsplit
 
 from .capsule import add_extractor, add_workflow_step
 from .models import ExtractorSpec, RequestRecord, ResponseRecord, WorkflowStep

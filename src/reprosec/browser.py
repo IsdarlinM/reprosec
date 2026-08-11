@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
 from .capsule import add_capture_event
 from .models import CaptureEvent
 
 SENSITIVE_KEYS = {"password", "passwd", "authorization", "cookie", "token", "secret"}
+BrowserEventType = Literal["navigation", "http", "websocket", "storage", "dom_assertion"]
 
 
 def _sanitize(value: Any) -> Any:
@@ -27,7 +28,7 @@ class BrowserRecorder:
     def __init__(self, capsule: Path) -> None:
         self.capsule = capsule
 
-    def record_event(self, event_type: str, data: dict[str, Any], *, actor_id: str | None = None, session_id: str | None = None) -> CaptureEvent:
+    def record_event(self, event_type: BrowserEventType, data: dict[str, Any], *, actor_id: str | None = None, session_id: str | None = None) -> CaptureEvent:
         if event_type not in {"navigation", "http", "websocket", "storage", "dom_assertion"}:
             raise ValueError("unsupported browser event type")
         event = CaptureEvent(event_type=event_type, actor_id=actor_id, session_id=session_id, data=_sanitize(data), redacted=True)
@@ -43,7 +44,8 @@ class BrowserRecorder:
             raw=json.loads(line)
             if not isinstance(raw,dict) or not isinstance(raw.get("type"),str) or not isinstance(raw.get("data",{}),dict):
                 raise ValueError("invalid browser recording event")
-            events.append(self.record_event(raw["type"],raw.get("data",{}),actor_id=actor_id,session_id=session_id))
+            event_type = cast(BrowserEventType, raw["type"])
+            events.append(self.record_event(event_type,raw.get("data",{}),actor_id=actor_id,session_id=session_id))
         return events
 
 
@@ -63,6 +65,6 @@ class BrowserRecordingSession:
         self.state_path.write_text(json.dumps(state,indent=2),encoding="utf-8");return state
     def stop(self)->dict[str,Any]:
         if not self.state_path.is_file():raise RuntimeError("browser recorder has not been started")
-        state=json.loads(self.state_path.read_text());state["active"]=False;state["stopped_at"]=__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat();self.state_path.write_text(json.dumps(state,indent=2),encoding="utf-8");return state
+        state=cast(dict[str,Any],json.loads(self.state_path.read_text()));state["active"]=False;state["stopped_at"]=__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat();self.state_path.write_text(json.dumps(state,indent=2),encoding="utf-8");return state
     def status(self)->dict[str,Any]:
-        return json.loads(self.state_path.read_text()) if self.state_path.is_file() else {"active":False}
+        return cast(dict[str,Any],json.loads(self.state_path.read_text())) if self.state_path.is_file() else {"active":False}

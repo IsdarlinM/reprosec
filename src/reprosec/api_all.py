@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
+from typing import cast
+
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
 from sric.capabilities import discover_capabilities
@@ -36,10 +39,24 @@ def _mount_degraded_workbench(app: FastAPI, reason: str) -> None:
 
 def create_app() -> FastAPI:
     app = create_base_app()
+    native_capabilities = cast(Callable[[], Awaitable[dict[str, object]]], next(
+        getattr(route, "endpoint")
+        for route in app.routes
+        if getattr(route, "path", None) == "/api/v1/capabilities"
+    ))
+    app.router.routes = [
+        route
+        for route in app.router.routes
+        if getattr(route, "path", None) != "/api/v1/capabilities"
+    ]
 
     @app.get("/api/v1/capabilities", tags=["standalone"])
     async def capabilities() -> dict[str, object]:
-        return discover_capabilities(current_product="reprosec").model_dump(mode="json")
+        native = await native_capabilities()
+        standalone = discover_capabilities(current_product="reprosec").model_dump(
+            mode="json"
+        )
+        return {**native, **standalone}
 
     @app.get("/api/v1/runtime-compatibility", tags=["standalone"])
     async def runtime_compatibility() -> dict[str, object]:
